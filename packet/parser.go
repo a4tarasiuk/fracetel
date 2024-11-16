@@ -13,17 +13,54 @@ func ParsePacket(rawPacket RawPacket) {
 
 	header := Header{}
 
-	binary.Read(headerBuffer, binary.LittleEndian, &header)
+	err := binary.Read(headerBuffer, binary.LittleEndian, &header)
 
-	if header.PacketID == LapDataID {
-		// log.Printf("Header: %+v\n", header)
+	if err != nil {
+		log.Printf("Error during reading Header: %s", err)
+	}
 
-		lapData := LapData{}
+	packetID := ID(header.PacketID)
 
-		lapDataBuffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes+1:])
+	if packetID == MotionID || packetID == EventID {
+		return
+	}
 
-		binary.Read(lapDataBuffer, binary.LittleEndian, &lapData)
+	log.Printf(
+		"Packet - [%s]: \"%s\" | %+v\n",
+		IDName[ID(header.PacketID)],
+		IDDescription[ID(header.PacketID)],
+		header,
+	)
 
-		log.Printf("Lap Data: %+v\n", lapData)
+	if packetID == LapDataID {
+
+		lapData := make([]LapData, 22)
+
+		lapDataBuffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
+
+		err = binary.Read(lapDataBuffer, binary.LittleEndian, &lapData)
+
+		if err != nil {
+			log.Printf("Error during reading LapData: %s", err)
+		}
+
+		for i := 0; i < 22; i++ {
+			log.Printf("Lap Data: %+v\n", lapData[i])
+		}
+
+	} else if packetID == CarTelemetryID {
+		telemetries := make([]CarTelemetry, 22)
+
+		carTelemetryBuffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
+
+		err := binary.Read(carTelemetryBuffer, binary.LittleEndian, &telemetries)
+
+		if err != nil {
+			log.Printf("Error during reading car telemetries: %s", err)
+		}
+
+		for i := 0; i < 22; i++ {
+			log.Printf("Car Telemetry: %+v\n", telemetries[i])
+		}
 	}
 }
