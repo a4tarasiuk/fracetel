@@ -1,5 +1,7 @@
 package packet
 
+const F1TotalCars = 22
+
 const (
 	MotionID              ID = 0
 	SessionID                = 1
