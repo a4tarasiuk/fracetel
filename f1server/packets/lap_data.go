@@ -1,4 +1,6 @@
-package packet
+package packets
+
+import "fracetel/models"
 
 type LapData struct {
 	LastLapTimeMs    uint32
@@ -43,4 +45,17 @@ type LapData struct {
 
 	PitStopTimerMs        uint16
 	PitStopShouldServePen uint8
+}
+
+func (ld LapData) ToFRT() models.LapData {
+	return models.LapData{
+		LastLapTimeMs:      ld.LastLapTimeMs,
+		CurrentLapTimeMs:   ld.CurrentLapTimeMs,
+		FirstSectorTimeMs:  ld.FirstSectorTimeMs,
+		SecondSectorTimeMs: ld.SecondSectorTimeMs,
+		LapDistance:        ld.LapDistance,
+		TotalDistance:      ld.TotalDistance,
+		CarPosition:        ld.CarPosition,
+		CurrentLapNum:      ld.CurrentLapNum,
+	}
 }

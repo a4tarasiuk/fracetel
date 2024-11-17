@@ -1,4 +1,4 @@
-package packet
+package packets
 
 type Header struct {
 	PacketFormat uint16

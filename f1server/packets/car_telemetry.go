@@ -1,4 +1,6 @@
-package packet
+package packets
+
+import "fracetel/models"
 
 type CarTelemetry struct {
 	Speed uint16
@@ -43,4 +45,27 @@ type CarTelemetry struct {
 	SurfaceType2 uint8
 	SurfaceType3 uint8
 	SurfaceType4 uint8
+}
+
+func (ct CarTelemetry) ToFRT() models.CarTelemetry {
+	return models.CarTelemetry{
+		Speed:     ct.Speed,
+		Throttle:  ct.Throttle,
+		Steer:     ct.Steer,
+		Brake:     ct.Brake,
+		EngineRPM: ct.EngineRPM,
+		DRS:       ct.DRS,
+		TyreSurfaceTemperature: []uint8{
+			ct.TyresSurfaceTemperatureRL,
+			ct.TyresSurfaceTemperatureRR,
+			ct.TyresSurfaceTemperatureFL,
+			ct.TyresSurfaceTemperatureFR,
+		},
+		TyreInnerTemperature: []uint8{
+			ct.TyresInnerTemperatureRL,
+			ct.TyresInnerTemperatureRR,
+			ct.TyresInnerTemperatureFL,
+			ct.TyresInnerTemperatureFR,
+		},
+	}
 }

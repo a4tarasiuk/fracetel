@@ -1,4 +1,4 @@
-package packet
+package packets
 
 const F1TotalCars = 22
 

@@ -1,17 +1,19 @@
-package packet
+package parser
 
 import (
 	"bytes"
 	"encoding/binary"
 	"log"
+
+	packets2 "fracetel/f1server/packets"
 )
 
 const HeaderTotalBytes = 24
 
-func ParsePacket(rawPacket RawPacket) {
+func ParsePacket(rawPacket packets2.RawPacket) {
 	headerBuffer := bytes.NewBuffer(rawPacket[:HeaderTotalBytes])
 
-	header := Header{}
+	header := packets2.Header{}
 
 	err := binary.Read(headerBuffer, binary.LittleEndian, &header)
 
@@ -19,15 +21,15 @@ func ParsePacket(rawPacket RawPacket) {
 		log.Printf("Error during reading Header: %s", err)
 	}
 
-	packetID := ID(header.PacketID)
+	packetID := packets2.ID(header.PacketID)
 
-	if packetID == MotionID || packetID == EventID {
+	if packetID == packets2.MotionID || packetID == packets2.EventID {
 		return
 	}
 
-	if packetID == LapDataID {
+	if packetID == packets2.LapDataID {
 
-		lapData := make([]LapData, F1TotalCars)
+		lapData := make([]packets2.LapData, packets2.F1TotalCars)
 
 		lapDataBuffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
 
@@ -37,12 +39,12 @@ func ParsePacket(rawPacket RawPacket) {
 			log.Printf("Error during reading LapData: %s", err)
 		}
 
-		playerLapData := lapData[header.PlayerCarIdx]
+		playerLapData := lapData[header.PlayerCarIdx].ToFRT()
 
 		log.Printf("Lap Data: %+v\n", playerLapData)
 
-	} else if packetID == CarTelemetryID {
-		telemetries := make([]CarTelemetry, F1TotalCars)
+	} else if packetID == packets2.CarTelemetryID {
+		telemetries := make([]packets2.CarTelemetry, packets2.F1TotalCars)
 
 		carTelemetryBuffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
 
@@ -54,13 +56,15 @@ func ParsePacket(rawPacket RawPacket) {
 
 		playerCarTelemetry := telemetries[header.PlayerCarIdx]
 
-		log.Printf("Car Telemetry: %+v\n", playerCarTelemetry)
+		frtCarTelemetry := playerCarTelemetry.ToFRT()
+
+		log.Printf("Car Telemetry: %+v\n", frtCarTelemetry)
 
 	} else {
 		log.Printf(
 			"Packet - [%s]: \"%s\" | %+v\n",
-			IDName[ID(header.PacketID)],
-			IDDescription[ID(header.PacketID)],
+			packets2.IDName[packets2.ID(header.PacketID)],
+			packets2.IDDescription[packets2.ID(header.PacketID)],
 			header,
 		)
 	}
