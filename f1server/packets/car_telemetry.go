@@ -55,17 +55,17 @@ func (ct CarTelemetry) ToFRT() models.CarTelemetry {
 		Brake:     ct.Brake,
 		EngineRPM: ct.EngineRPM,
 		DRS:       ct.DRS,
-		TyreSurfaceTemperature: []uint8{
-			ct.TyresSurfaceTemperatureRL,
-			ct.TyresSurfaceTemperatureRR,
-			ct.TyresSurfaceTemperatureFL,
-			ct.TyresSurfaceTemperatureFR,
+		TyreSurfaceTemperature: []int{
+			int(ct.TyresSurfaceTemperatureRL),
+			int(ct.TyresSurfaceTemperatureRR),
+			int(ct.TyresSurfaceTemperatureFL),
+			int(ct.TyresSurfaceTemperatureFR),
 		},
-		TyreInnerTemperature: []uint8{
-			ct.TyresInnerTemperatureRL,
-			ct.TyresInnerTemperatureRR,
-			ct.TyresInnerTemperatureFL,
-			ct.TyresInnerTemperatureFR,
+		TyreInnerTemperature: []int{
+			int(ct.TyresInnerTemperatureRL),
+			int(ct.TyresInnerTemperatureRR),
+			int(ct.TyresInnerTemperatureFL),
+			int(ct.TyresInnerTemperatureFR),
 		},
 	}
 }

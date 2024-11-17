@@ -4,18 +4,25 @@ import (
 	"log"
 	"net"
 
-	"fracetel/f1server/parser"
+	"fracetel/models"
 )
 
 type f1UDPServer struct {
 	addr net.IP
 	port int
+
+	messageChannel chan *models.Message
 }
 
-func NewF1UDPServer(addr net.IP, port int) *f1UDPServer {
+func NewF1UDPServer(
+	addr net.IP,
+	port int,
+	messageChannel chan *models.Message,
+) *f1UDPServer {
 	return &f1UDPServer{
-		addr: addr,
-		port: port,
+		addr:           addr,
+		port:           port,
+		messageChannel: messageChannel,
 	}
 }
 
@@ -44,8 +51,10 @@ func (s *f1UDPServer) Start() {
 			log.Printf("Error during reading packets: %v\n", err)
 		}
 
-		// log.Printf("Received packets from: %s, bytes=%d\n", receiveAddr, nRead)
+		message, _ := ParsePacket(buffer[:nRead])
 
-		parser.ParsePacket(buffer[:nRead])
+		if message != nil {
+			s.messageChannel <- message // TODO: Replace blocking call with putting message in a queue
+		}
 	}
 }
