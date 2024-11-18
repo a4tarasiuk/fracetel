@@ -1,18 +1,17 @@
 package processing
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
-	"fracetel/models"
 	"github.com/gorilla/websocket"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type webSocketHandler struct {
 	upgrader websocket.Upgrader
 
-	messageCh <-chan *models.Message
+	rabbitChannel *amqp.Channel
 }
 
 func (wsh webSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -27,16 +26,46 @@ func (wsh webSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	defer c.Close()
 
+	q, err := wsh.rabbitChannel.QueueDeclare(
+		"",    // name
+		false, // durable
+		false, // delete when unused
+		true,  // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	if err != nil {
+		log.Panicf("%s: %s", "Failed to declare a queue", err)
+	}
+
+	err = wsh.rabbitChannel.QueueBind(
+		q.Name,          // queue name
+		"",              // routing key
+		"fracetel_logs", // exchange
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Panicf("%s: %s", "Failed to create a queue binding", err)
+	}
+
+	messages, err := wsh.rabbitChannel.Consume(
+		q.Name, // queue
+		"",     // consumer
+		true,   // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
+	if err != nil {
+		log.Panicf("%s: %s", "Failed to register a consumer", err)
+	}
+
 	for {
-		for msg := range wsh.messageCh {
+		for msg := range messages {
 
-			rawData, err := json.Marshal(msg)
-
-			if err != nil {
-				log.Printf("Error %s when marshaling message", err)
-			}
-
-			err = c.WriteMessage(websocket.TextMessage, rawData)
+			err = c.WriteMessage(websocket.TextMessage, msg.Body)
 
 			if err != nil {
 				log.Printf("Error %s when sending message to client", err)
@@ -45,10 +74,35 @@ func (wsh webSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func StartWsServer(wsMessageCh <-chan *models.Message) {
+func StartWsServer(rabbitMQURL string) {
+	conn, err := amqp.Dial(rabbitMQURL)
+	if err != nil {
+		log.Panicf("%s: %s", "Failed to connect to RabbitMQ", err)
+	}
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Panicf("%s: %s", "Failed to open a channel", err)
+	}
+	defer ch.Close()
+
+	err = ch.ExchangeDeclare(
+		"fracetel_logs",
+		"direct",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Panicf("%s: %s", "Failed to declare an exchange", err)
+	}
+
 	wsHandler := webSocketHandler{
-		upgrader:  websocket.Upgrader{},
-		messageCh: wsMessageCh,
+		upgrader:      websocket.Upgrader{},
+		rabbitChannel: ch,
 	}
 
 	http.Handle("/", wsHandler)
