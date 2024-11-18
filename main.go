@@ -4,23 +4,19 @@ import (
 	"net"
 
 	"fracetel/f1server"
-	"fracetel/models"
 	"fracetel/processing"
 )
 
 func main() {
+	foreverCh := make(chan int)
 
-	wsMessageCh := make(chan *models.Message)
+	go processing.StartWsServer("amqp://guest:guest@localhost:5672/")
 
-	messageCh := make(chan *models.Message)
+	go f1server.CreateAndStart(
+		net.IPv4(0, 0, 0, 0),
+		20777,
+		"amqp://guest:guest@localhost:5672/",
+	)
 
-	consumer := processing.NewMessageConsumer(messageCh, wsMessageCh)
-
-	go consumer.ProcessMessages()
-
-	go processing.StartWsServer(wsMessageCh)
-
-	f1UDPServer := f1server.NewF1UDPServer(net.IPv4(0, 0, 0, 0), 20777, messageCh)
-
-	f1UDPServer.Start()
+	<-foreverCh
 }
