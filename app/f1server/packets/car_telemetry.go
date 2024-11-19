@@ -1,6 +1,8 @@
 package packets
 
-import "fracetel/models"
+import (
+	"fracetel/core/models"
+)
 
 type CarTelemetry struct {
 	Speed uint16

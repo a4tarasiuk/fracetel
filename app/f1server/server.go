@@ -7,8 +7,7 @@ import (
 	"net"
 	"time"
 
-	"fracetel/models"
-
+	"fracetel/core/models"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 

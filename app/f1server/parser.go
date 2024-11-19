@@ -6,8 +6,8 @@ import (
 	"errors"
 	"log"
 
-	"fracetel/f1server/packets"
-	"fracetel/models"
+	"fracetel/app/f1server/packets"
+	"fracetel/core/models"
 )
 
 const HeaderTotalBytes = 24

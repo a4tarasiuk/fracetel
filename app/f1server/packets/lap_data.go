@@ -1,6 +1,8 @@
 package packets
 
-import "fracetel/models"
+import (
+	"fracetel/core/models"
+)
 
 type LapData struct {
 	LastLapTimeMs    uint32
