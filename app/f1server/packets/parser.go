@@ -6,17 +6,16 @@ import (
 	"errors"
 	"log"
 
-	"fracetel/core/models"
+	"fracetel/core/messages"
 )
 
 const HeaderTotalBytes = 24
 
 type PacketParser interface {
-	ToMessage(header *Header, rawPacket RawPacket) (*models.Message, error)
+	ToMessage(header *Header, rawPacket RawPacket) (*messages.Message, error)
 }
 
 var packetParsersMap = map[ID]PacketParser{
-	EventID:        eventPacketParser{},
 	LapDataID:      lapTimePacketParser{},
 	CarTelemetryID: carTelemetryPacketParser{},
 }
@@ -31,16 +30,6 @@ func GetParserForPacket(packetID ID) (PacketParser, error) {
 	return parser, nil
 }
 
-func parsePacketBody(packet RawPacket, target interface{}) {
-	buffer := bytes.NewBuffer(packet[HeaderTotalBytes:])
-
-	err := binary.Read(buffer, binary.LittleEndian, &target)
-
-	if err != nil {
-		log.Printf("Error during reading LapData: %s", err)
-	}
-}
-
 func ParserPacketHeader(packet RawPacket) (*Header, error) {
 	headerBuffer := bytes.NewBuffer(packet[:HeaderTotalBytes])
 
@@ -52,12 +41,12 @@ func ParserPacketHeader(packet RawPacket) (*Header, error) {
 		return &Header{}, err
 	}
 
-	// log.Printf(
-	// 	"Packet - [%s]: \"%s\" | %+v\n",
-	// 	packets.IDName[packets.ID(header.PacketID)],
-	// 	packets.IDDescription[packets.ID(header.PacketID)],
-	// 	header,
-	// )
+	log.Printf(
+		"Packet - [%s]: \"%s\" | %d\n",
+		IDName[ID(header.PacketID)],
+		IDDescription[ID(header.PacketID)],
+		header.SessionUID,
+	)
 
 	return &header, nil
 }

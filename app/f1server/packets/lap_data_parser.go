@@ -1,26 +1,32 @@
 package packets
 
 import (
+	"bytes"
+	"encoding/binary"
 	"log"
 
-	"fracetel/core/models"
+	"fracetel/core/messages"
 )
 
 type lapTimePacketParser struct{}
 
-func (p lapTimePacketParser) ToMessage(header *Header, rawPacket RawPacket) (*models.Message, error) {
+func (p lapTimePacketParser) ToMessage(header *Header, rawPacket RawPacket) (*messages.Message, error) {
 
 	lapData := make([]LapData, F1TotalCars)
 
-	parsePacketBody(rawPacket, &lapData)
+	buffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
 
-	msg := &models.Message{
-		Type:      models.LapDataMessageType,
-		SessionID: header.SessionUID,
-		Payload:   lapData[header.PlayerCarIdx].ToFRT(),
+	err := binary.Read(buffer, binary.LittleEndian, &lapData)
+
+	if err != nil {
+		log.Printf("Error during reading LapData: %s", err)
 	}
+
+	frtLapData := lapData[header.PlayerCarIdx].ToFRT()
+
+	msg := messages.New(messages.LapDataMessageType, header.SessionUID, &frtLapData)
 
 	log.Printf("Lap Data: %+v\n", msg.Payload)
 
-	return msg, nil
+	return &msg, nil
 }

@@ -1,28 +1,34 @@
 package packets
 
 import (
+	"bytes"
+	"encoding/binary"
 	"log"
 
-	"fracetel/core/models"
+	"fracetel/core/messages"
 )
 
 type carTelemetryPacketParser struct{}
 
 func (p carTelemetryPacketParser) ToMessage(header *Header, rawPacket RawPacket) (
-	*models.Message,
+	*messages.Message,
 	error,
 ) {
 	telemetries := make([]CarTelemetry, F1TotalCars)
 
-	parsePacketBody(rawPacket, &telemetries)
+	buffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
 
-	msg := &models.Message{
-		Type:      models.CarTelemetryMessageType,
-		SessionID: header.SessionUID,
-		Payload:   telemetries[header.PlayerCarIdx].ToFRT(),
+	err := binary.Read(buffer, binary.LittleEndian, &telemetries)
+
+	if err != nil {
+		log.Printf("Error during reading LapData: %s", err)
 	}
+
+	frtTelemetry := telemetries[header.PlayerCarIdx].ToFRT()
+
+	msg := messages.New(messages.CarTelemetryMessageType, header.SessionUID, &frtTelemetry)
 
 	log.Printf("Car Telemetry: %+v\n", msg.Payload)
 
-	return msg, nil
+	return &msg, nil
 }

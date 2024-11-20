@@ -1,70 +1,34 @@
 package f1server
 
 import (
-	"context"
-	"encoding/json"
 	"log"
 	"net"
-	"time"
 
-	"fracetel/core/models"
-	amqp "github.com/rabbitmq/amqp091-go"
+	"fracetel/app/f1server/packets"
+	"fracetel/core/messages"
+	"fracetel/core/streams"
 )
 
 type f1UDPServer struct {
 	addr net.IP
 	port int
 
-	messageChannel chan *models.Message
+	messageStream MessagePublisher
 
-	rabbitChannel *amqp.Channel
+	sessionManager *_sessionManager
 }
 
 func NewF1UDPServer(
 	addr net.IP,
 	port int,
-	rabbitChannel *amqp.Channel,
+	messageStream MessagePublisher,
 ) *f1UDPServer {
 	return &f1UDPServer{
-		addr:          addr,
-		port:          port,
-		rabbitChannel: rabbitChannel,
+		addr:           addr,
+		port:           port,
+		messageStream:  messageStream,
+		sessionManager: newSessionStateManager(messageStream),
 	}
-}
-
-func CreateAndStart(
-	addr net.IP,
-	port int,
-	rabbitMQURL string,
-) {
-	conn, err := amqp.Dial(rabbitMQURL)
-	if err != nil {
-		log.Panicf("%s: %s", "Failed to connect to RabbitMQ", err)
-	}
-	defer conn.Close()
-
-	ch, err := conn.Channel()
-	if err != nil {
-		log.Panicf("%s: %s", "Failed to open a channel", err)
-	}
-	defer ch.Close()
-
-	err = ch.ExchangeDeclare(
-		"fracetel_logs",
-		"direct",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		log.Panicf("%s: %s", "Failed to declare an exchange", err)
-	}
-
-	server := NewF1UDPServer(addr, port, ch)
-
-	server.Start()
 }
 
 func (s *f1UDPServer) Start() {
@@ -83,6 +47,8 @@ func (s *f1UDPServer) Start() {
 
 	log.Printf("Listening on %d", s.port)
 
+	jsCorePublisher := NewJSCoreMessagePublisher()
+
 	for {
 		buffer := make([]byte, 2048)
 
@@ -92,37 +58,43 @@ func (s *f1UDPServer) Start() {
 			log.Printf("Error during reading packets: %v\n", err)
 		}
 
-		message, _ := ParsePacket(buffer[:nRead])
+		rawPacket := buffer[:nRead]
 
-		if message != nil {
-			publishMessage(s.rabbitChannel, message)
+		header, err := packets.ParserPacketHeader(rawPacket)
+		if err != nil {
+			log.Printf("Error during reading Header: %s", err)
+			continue
 		}
-	}
-}
 
-func publishMessage(ch *amqp.Channel, message interface{}) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+		s.sessionManager.StartSessionIfNotExist(header.SessionUID)
 
-	data, err := json.Marshal(message)
-	failOnError(err, "Failed to marshal message to JSON")
+		packetID := packets.ID(header.PacketID)
 
-	err = ch.PublishWithContext(
-		ctx,
-		"fracetel_logs",
-		"",
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        data,
-		},
-	)
-	failOnError(err, "Failed to send message to RabbitMQ")
-}
+		parser, err := packets.GetParserForPacket(packetID)
+		if err != nil {
+			continue
+		}
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
+		message, err := parser.ToMessage(header, rawPacket)
+		if err != nil {
+			continue
+		}
+
+		if message.Type == messages.SessionFinishedMessageType {
+			s.sessionManager.FinishSession()
+		}
+
+		if message.Type == messages.CarTelemetryMessageType {
+			jsCorePublisher.Publish(message, "telemetry.*")
+		}
+
+		subject, exists := streams.MessageTypeSubjectMap[message.Type]
+		if !exists {
+			continue
+		}
+
+		if err = s.messageStream.Publish(message, subject); err != nil {
+			log.Printf("failed to publish message: %s", err)
+		}
 	}
 }

@@ -1,40 +1,54 @@
 package packets
 
 import (
+	"bytes"
+	"encoding/binary"
 	"errors"
 	"log"
+	"strconv"
+	"time"
 
-	"fracetel/core/models"
+	"fracetel/core/messages"
 )
 
 type eventPacketParser struct{}
 
 func (p eventPacketParser) ToMessage(header *Header, rawPacket RawPacket) (
-	*models.Message,
+	*messages.Message,
 	error,
 ) {
 	event := Event{}
 
-	parsePacketBody(rawPacket, &event)
+	// parsePacketBody(rawPacket, &event)
+
+	buffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
+
+	err := binary.Read(buffer, binary.LittleEndian, &event)
+
+	if err != nil {
+		log.Printf("Error during reading LapData: %s", err)
+	}
 
 	if event.IsSessionStarted() {
-		log.Printf("=== SESSION STARTED ===, %d", header.SessionUID)
+		log.Printf("=== SESSION STARTED ===, %s", strconv.FormatUint(header.SessionUID, 10))
 
-		return &models.Message{
-			Type:      models.SessionStartedMessageType,
-			SessionID: header.SessionUID,
-			Payload:   nil,
+		return &messages.Message{
+			Type:       messages.SessionStartedMessageType,
+			SessionID:  header.SessionUID,
+			Payload:    nil,
+			OccurredAt: time.Now().UTC(),
 		}, nil
 
 	} else if event.IsSessionFinished() {
-		log.Printf("=== SESSION FINISHED ===, %d", header.SessionUID)
+		log.Printf("=== SESSION FINISHED ===, %s", strconv.FormatUint(header.SessionUID, 10))
 
-		return &models.Message{
-			Type:      models.SessionFinishedMessageType,
-			SessionID: header.SessionUID,
-			Payload:   nil,
+		return &messages.Message{
+			Type:       messages.SessionFinishedMessageType,
+			SessionID:  header.SessionUID,
+			Payload:    nil,
+			OccurredAt: time.Now().UTC(),
 		}, nil
 	}
 
-	return &models.Message{}, errors.New("unsupported event")
+	return &messages.Message{}, errors.New("unsupported event")
 }

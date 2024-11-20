@@ -14,14 +14,14 @@ type Event struct {
 	Code4 uint8
 }
 
-func (e Event) codeToString() EventDataCode {
+func (e Event) CodeToString() EventDataCode {
 	return EventDataCode(string(e.Code1) + string(e.Code2) + string(e.Code3) + string(e.Code4))
 }
 
 func (e Event) IsSessionStarted() bool {
-	return e.codeToString() == sessionStartedCode
+	return e.CodeToString() == sessionStartedCode
 }
 
 func (e Event) IsSessionFinished() bool {
-	return e.codeToString() == sessionFinishedCode
+	return e.CodeToString() == sessionFinishedCode
 }
