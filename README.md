@@ -13,5 +13,5 @@ TODO:
 ## Tech Stack
 Used technologies:
 * Golang
-* RabbitMQ
+* NATS
 * MongoDB
