@@ -7,7 +7,7 @@ import (
 	"fracetel/core/streams"
 )
 
-const defaultSessionID = 0
+const defaultSessionID = uint64(0)
 
 type _sessionManager struct {
 	currSessionID uint64

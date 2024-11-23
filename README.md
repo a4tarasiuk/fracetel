@@ -17,7 +17,7 @@ When there is a pretty much amount of interesting data it does not take much tim
 
 This project is not expected to be used by real game players.  
 My real-game cases are:
-* During time-attack sessions my lap can be deleted due to crossing the track limits, and there are cases when I don't agree with the penalty and still want to fight against that lap time :)
+* Persist session lap-times. During time-attack sessions my lap can be deleted due to crossing the track limits, and there are cases when I don't agree with the penalty and still want to fight against that lap time :)
 * Track the whole history of best lap for individual tracks (within race and qualifying/time-attack sessions)
 * TODO:
 
