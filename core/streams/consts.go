@@ -11,4 +11,12 @@ const (
 	SessionFinishedSubject = "sessions.finished"
 )
 
-var MessageTypeSubjectMap = map[messages.MessageType]string{}
+const (
+	FRaceTelStreamName      = "fracetel_logs"
+	FRaceTelSubjectName     = "fracetel_logs.*"
+	CarTelemetrySubjectName = "fracetel_logs.car_telemetry"
+)
+
+var MessageTypeSubjectMap = map[messages.MessageType]string{
+	messages.CarTelemetryMessageType: CarTelemetrySubjectName,
+}

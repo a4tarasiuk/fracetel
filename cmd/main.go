@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"fracetel/app/f1server"
-	"fracetel/app/sessions"
-	"fracetel/app/web"
 	"fracetel/app/worker"
 	"fracetel/core/streams"
 	"github.com/nats-io/nats.go"
@@ -33,6 +31,7 @@ func main() {
 	// Create a JetStream management interface
 	js, _ := jetstream.New(nc)
 
+	// session stream
 	_, err := js.CreateStream(
 		ctx, jetstream.StreamConfig{
 			Name:      streams.SessionStreamName,
@@ -41,7 +40,18 @@ func main() {
 		},
 	)
 	if err != nil {
-		log.Fatalf("Failed to create stream (JetStream): %s", err)
+		log.Fatalf("Failed to create stream (SessionStreamName): %s", err)
+	}
+
+	_, err = js.CreateStream(
+		ctx, jetstream.StreamConfig{
+			Name:      streams.FRaceTelStreamName,
+			Subjects:  []string{streams.FRaceTelSubjectName},
+			Retention: jetstream.WorkQueuePolicy,
+		},
+	)
+	if err != nil {
+		log.Fatalf("Failed to create stream (FRaceTelStreamName): %s", err)
 	}
 
 	mongoClient, _ := mongo.Connect(options.Client().ApplyURI("mongodb://root:example@localhost:27017"))
@@ -57,13 +67,10 @@ func main() {
 
 	go f1UDPServer.Start()
 
-	db := mongoClient.Database("fracetel")
+	go worker.ConsumeEvents(js, mongoClient)
 
-	userSessionRepository := sessions.NewUserSessionRepository(db.Collection("user_sessions"))
-
-	go worker.ConsumeEvents(js, userSessionRepository)
-
-	go web.StartWsServer()
+	//
+	// go web.StartWsServer()
 
 	<-foreverCh
 }

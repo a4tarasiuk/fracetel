@@ -24,9 +24,15 @@ func (p carTelemetryPacketParser) ToMessage(header *Header, rawPacket RawPacket)
 		log.Printf("Error during reading LapData: %s", err)
 	}
 
-	frtTelemetry := telemetries[header.PlayerCarIdx].ToFRT()
+	telemetryPayload := telemetries[header.PlayerCarIdx].ToMessagePayload()
 
-	msg := messages.New(messages.CarTelemetryMessageType, header.SessionUID, &frtTelemetry)
+	msg := messages.New(
+		messages.CarTelemetryMessageType,
+		header.SessionUID,
+		header.PacketID,
+		header.FrameIdentifier,
+		&telemetryPayload,
+	)
 
 	log.Printf("Car Telemetry: %+v\n", msg.Payload)
 

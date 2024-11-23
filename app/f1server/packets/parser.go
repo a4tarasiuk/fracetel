@@ -16,7 +16,7 @@ type PacketParser interface {
 }
 
 var packetParsersMap = map[ID]PacketParser{
-	LapDataID:      lapTimePacketParser{},
+	// LapDataID:      lapTimePacketParser{},
 	CarTelemetryID: carTelemetryPacketParser{},
 }
 
