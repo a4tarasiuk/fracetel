@@ -1,12 +1,43 @@
 services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: fracetel_rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+  mongo:
+    image: mongo
+    restart: always
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - ".docker-volumes/mongo_data:/data/db"
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
 
-volumes:
-  rabbitmq_data:
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+      ME_CONFIG_BASICAUTH: false
+
+  nats:
+    container_name: nats
+    hostname: nats
+    image: nats:2-alpine
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command:
+      - -js
+      - -sd
+      - /var/lib/nats/data
+    volumes:
+      - '.docker-volumes/jsdata:/var/lib/nats/data'
+
+  nui:
+    image: ghcr.io/nats-nui/nui:edge
+    ports:
+      - "31312:31311"
+    depends_on:
+      - nats

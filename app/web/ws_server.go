@@ -4,105 +4,68 @@ import (
 	"log"
 	"net/http"
 
+	"fracetel/core/messages"
 	"github.com/gorilla/websocket"
-	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/nats-io/nats.go"
 )
 
 type webSocketHandler struct {
 	upgrader websocket.Upgrader
 
-	rabbitChannel *amqp.Channel
+	natsConn      *nats.Conn
+	telemetryChan <-chan *messages.Message
 }
 
 func (wsh webSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	wsh.upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
-	c, err := wsh.upgrader.Upgrade(w, r, nil)
+	conn, err := wsh.upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
 		log.Printf("error %s when upgrading connection to websocket", err)
 		return
 	}
 
-	defer c.Close()
+	defer conn.Close()
 
-	q, err := wsh.rabbitChannel.QueueDeclare(
-		"",    // name
-		false, // durable
-		false, // delete when unused
-		true,  // exclusive
-		false, // no-wait
-		nil,   // arguments
-	)
-	if err != nil {
-		log.Panicf("%s: %s", "Failed to declare a queue", err)
-	}
+	_, err = wsh.natsConn.Subscribe(
+		"telemetry.*", func(msg *nats.Msg) {
 
-	err = wsh.rabbitChannel.QueueBind(
-		q.Name,          // queue name
-		"",              // routing key
-		"fracetel_logs", // exchange
-		false,
-		nil,
+			if err = conn.WriteMessage(websocket.TextMessage, msg.Data); err != nil {
+				log.Printf("Error %s when sending message to client", err)
+			}
+		},
 	)
-	if err != nil {
-		log.Panicf("%s: %s", "Failed to create a queue binding", err)
-	}
 
-	messages, err := wsh.rabbitChannel.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
 	if err != nil {
-		log.Panicf("%s: %s", "Failed to register a consumer", err)
+		log.Printf("failed to subscribe to nats core from ws server: %s", err)
 	}
 
 	for {
-		for msg := range messages {
+		messageType, _, err := conn.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
-			err = c.WriteMessage(websocket.TextMessage, msg.Body)
-
-			if err != nil {
-				log.Printf("Error %s when sending message to client", err)
-			}
+		if messageType == websocket.CloseMessage {
+			return
 		}
 	}
 }
 
-func StartWsServer(rabbitMQURL string) {
-	conn, err := amqp.Dial(rabbitMQURL)
+func StartWsServer() {
+	natsConn, err := nats.Connect(nats.DefaultURL)
 	if err != nil {
-		log.Panicf("%s: %s", "Failed to connect to RabbitMQ", err)
+		log.Fatalf("Failed to connect to NATS core from ws server: %s", err)
 	}
-	defer conn.Close()
 
-	ch, err := conn.Channel()
-	if err != nil {
-		log.Panicf("%s: %s", "Failed to open a channel", err)
-	}
-	defer ch.Close()
-
-	err = ch.ExchangeDeclare(
-		"fracetel_logs",
-		"direct",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		log.Panicf("%s: %s", "Failed to declare an exchange", err)
-	}
+	telemetryChan := make(chan *messages.Message)
 
 	wsHandler := webSocketHandler{
 		upgrader:      websocket.Upgrader{},
-		rabbitChannel: ch,
+		natsConn:      natsConn,
+		telemetryChan: telemetryChan,
 	}
 
 	http.Handle("/", wsHandler)

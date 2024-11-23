@@ -1,7 +1,7 @@
 package packets
 
 import (
-	"fracetel/core/models"
+	"fracetel/core/messages"
 )
 
 type LapData struct {
@@ -49,8 +49,8 @@ type LapData struct {
 	PitStopShouldServePen uint8
 }
 
-func (ld LapData) ToFRT() models.LapData {
-	return models.LapData{
+func (ld LapData) ToFRT() messages.LapData {
+	return messages.LapData{
 		LastLapTimeMs:      ld.LastLapTimeMs,
 		CurrentLapTimeMs:   ld.CurrentLapTimeMs,
 		FirstSectorTimeMs:  ld.FirstSectorTimeMs,

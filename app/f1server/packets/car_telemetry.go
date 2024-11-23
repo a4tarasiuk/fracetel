@@ -1,7 +1,7 @@
 package packets
 
 import (
-	"fracetel/core/models"
+	"fracetel/core/messages"
 )
 
 type CarTelemetry struct {
@@ -49,8 +49,8 @@ type CarTelemetry struct {
 	SurfaceType4 uint8
 }
 
-func (ct CarTelemetry) ToFRT() models.CarTelemetry {
-	return models.CarTelemetry{
+func (ct CarTelemetry) ToFRT() messages.CarTelemetry {
+	return messages.CarTelemetry{
 		Speed:     ct.Speed,
 		Throttle:  ct.Throttle,
 		Steer:     ct.Steer,

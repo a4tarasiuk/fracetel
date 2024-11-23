@@ -1,4 +1,4 @@
-package models
+package messages
 
 type CarTelemetry struct {
 	Speed uint16 `json:"speed"`
