@@ -4,7 +4,7 @@ type MessageType string
 
 const (
 	CarTelemetryMessageType    MessageType = "CAR_TELEMETRY"
-	LapDataMessageType                     = "LAP_DATA"
-	SessionStartedMessageType              = "SESSION_STARTED"
-	SessionFinishedMessageType             = "SESSION_FINISHED"
+	LapDataMessageType         MessageType = "LAP_DATA"
+	SessionStartedMessageType  MessageType = "SESSION_STARTED"
+	SessionFinishedMessageType MessageType = "SESSION_FINISHED"
 )
