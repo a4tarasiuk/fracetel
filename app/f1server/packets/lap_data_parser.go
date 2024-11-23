@@ -22,11 +22,13 @@ func (p lapTimePacketParser) ToMessage(header *Header, rawPacket RawPacket) (*me
 		log.Printf("Error during reading LapData: %s", err)
 	}
 
-	frtLapData := lapData[header.PlayerCarIdx].ToFRT()
+	// frtLapData := lapData[header.PlayerCarIdx].ToFRT()
 
-	msg := messages.New(messages.LapDataMessageType, header.SessionUID, &frtLapData)
+	// msg := messages.New(messages.LapDataMessageType, header.SessionUID, &frtLapData)
+	//
+	// log.Printf("Lap Data: %+v\n", msg.Payload)
+	//
+	// return &msg, nil
 
-	log.Printf("Lap Data: %+v\n", msg.Payload)
-
-	return &msg, nil
+	return nil, nil
 }

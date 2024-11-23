@@ -14,8 +14,6 @@ type f1UDPServer struct {
 	port int
 
 	messageStream MessagePublisher
-
-	sessionManager *_sessionManager
 }
 
 func NewF1UDPServer(
@@ -24,10 +22,9 @@ func NewF1UDPServer(
 	messageStream MessagePublisher,
 ) *f1UDPServer {
 	return &f1UDPServer{
-		addr:           addr,
-		port:           port,
-		messageStream:  messageStream,
-		sessionManager: newSessionStateManager(messageStream),
+		addr:          addr,
+		port:          port,
+		messageStream: messageStream,
 	}
 }
 
@@ -47,7 +44,9 @@ func (s *f1UDPServer) Start() {
 
 	log.Printf("Listening on %d", s.port)
 
-	jsCorePublisher := NewJSCoreMessagePublisher()
+	messageChan := make(chan *messages.Message)
+
+	go MessageProcessor(s.messageStream, messageChan)
 
 	for {
 		buffer := make([]byte, 2048)
@@ -62,11 +61,9 @@ func (s *f1UDPServer) Start() {
 
 		header, err := packets.ParserPacketHeader(rawPacket)
 		if err != nil {
-			log.Printf("Error during reading Header: %s", err)
+			log.Printf("Error during reading Message: %s", err)
 			continue
 		}
-
-		s.sessionManager.StartSessionIfNotExist(header.SessionUID)
 
 		packetID := packets.ID(header.PacketID)
 
@@ -80,21 +77,21 @@ func (s *f1UDPServer) Start() {
 			continue
 		}
 
-		if message.Type == messages.SessionFinishedMessageType {
-			s.sessionManager.FinishSession()
-		}
+		messageChan <- message
+	}
+}
 
-		if message.Type == messages.CarTelemetryMessageType {
-			jsCorePublisher.Publish(message, "telemetry.*")
-		}
+func MessageProcessor(messageStream MessagePublisher, messageChan <-chan *messages.Message) {
+	for message := range messageChan {
 
-		subject, exists := streams.MessageTypeSubjectMap[message.Type]
-		if !exists {
+		subjectName, ok := streams.MessageTypeSubjectMap[message.Type]
+
+		if !ok {
 			continue
 		}
 
-		if err = s.messageStream.Publish(message, subject); err != nil {
-			log.Printf("failed to publish message: %s", err)
+		if err := messageStream.Publish(message, subjectName); err != nil {
+			log.Printf("failed to publish message. type: %s| packed_id: %s", message.Type, message.Header.PacketID)
 		}
 	}
 }

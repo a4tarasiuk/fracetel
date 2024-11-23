@@ -49,13 +49,13 @@ type CarTelemetry struct {
 	SurfaceType4 uint8
 }
 
-func (ct CarTelemetry) ToFRT() messages.CarTelemetry {
+func (ct CarTelemetry) ToMessagePayload() messages.CarTelemetry {
 	return messages.CarTelemetry{
-		Speed:     ct.Speed,
+		Speed:     int(ct.Speed),
 		Throttle:  ct.Throttle,
 		Steer:     ct.Steer,
 		Brake:     ct.Brake,
-		EngineRPM: ct.EngineRPM,
+		EngineRPM: int(ct.EngineRPM),
 		DRS:       ct.DRS,
 		TyreSurfaceTemperature: []int{
 			int(ct.TyresSurfaceTemperatureRL),
