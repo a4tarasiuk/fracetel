@@ -11,12 +11,14 @@ import (
 
 const HeaderTotalBytes = 24
 
+var PacketByteOrder = binary.LittleEndian
+
 type PacketParser interface {
 	ToMessage(header *Header, rawPacket RawPacket) (*messages.Message, error)
 }
 
 var packetParsersMap = map[ID]PacketParser{
-	// LapDataID:      lapTimePacketParser{},
+	LapDataID:      lapTimePacketParser{},
 	CarTelemetryID: carTelemetryPacketParser{},
 }
 
@@ -35,7 +37,7 @@ func ParserPacketHeader(packet RawPacket) (*Header, error) {
 
 	header := Header{}
 
-	err := binary.Read(headerBuffer, binary.LittleEndian, &header)
+	err := binary.Read(headerBuffer, PacketByteOrder, &header)
 
 	if err != nil {
 		return &Header{}, err
@@ -45,7 +47,7 @@ func ParserPacketHeader(packet RawPacket) (*Header, error) {
 		"Packet - [%s]: \"%s\" | %d\n",
 		IDName[ID(header.PacketID)],
 		IDDescription[ID(header.PacketID)],
-		header.SessionUID,
+		header.PacketID,
 	)
 
 	return &header, nil

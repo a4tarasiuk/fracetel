@@ -21,7 +21,7 @@ func (p eventPacketParser) ToMessage(header *Header, rawPacket RawPacket) (
 
 	buffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
 
-	err := binary.Read(buffer, binary.LittleEndian, &event)
+	err := binary.Read(buffer, PacketByteOrder, &event)
 
 	if err != nil {
 		log.Printf("Error during reading LapData: %s", err)

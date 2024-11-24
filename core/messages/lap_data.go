@@ -1,16 +1,20 @@
 package messages
 
 type LapData struct {
-	LastLapTimeMs    uint32
-	CurrentLapTimeMs uint32
+	LastLapTimeMs    int
+	CurrentLapTimeMs int
 
-	FirstSectorTimeMs  uint16
-	SecondSectorTimeMs uint16
+	FirstSectorTimeMs  int
+	SecondSectorTimeMs int
 
 	LapDistance   float32
 	TotalDistance float32
 
-	CarPosition uint8
+	CarPosition int
 
-	CurrentLapNum uint8
+	CurrentLapNum int
+
+	Sector int
+
+	DriverStatus int
 }

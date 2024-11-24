@@ -49,15 +49,17 @@ type LapData struct {
 	PitStopShouldServePen uint8
 }
 
-func (ld LapData) ToFRT() messages.LapData {
+func (ld LapData) ToMessage() messages.LapData {
 	return messages.LapData{
-		LastLapTimeMs:      ld.LastLapTimeMs,
-		CurrentLapTimeMs:   ld.CurrentLapTimeMs,
-		FirstSectorTimeMs:  ld.FirstSectorTimeMs,
-		SecondSectorTimeMs: ld.SecondSectorTimeMs,
+		LastLapTimeMs:      int(ld.LastLapTimeMs),
+		CurrentLapTimeMs:   int(ld.CurrentLapTimeMs),
+		FirstSectorTimeMs:  int(ld.FirstSectorTimeMs),
+		SecondSectorTimeMs: int(ld.SecondSectorTimeMs),
 		LapDistance:        ld.LapDistance,
 		TotalDistance:      ld.TotalDistance,
-		CarPosition:        ld.CarPosition,
-		CurrentLapNum:      ld.CurrentLapNum,
+		CarPosition:        int(ld.CarPosition),
+		CurrentLapNum:      int(ld.CurrentLapNum),
+		Sector:             int(ld.Sector),
+		DriverStatus:       int(ld.DriverStatus),
 	}
 }
