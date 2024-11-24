@@ -178,3 +178,45 @@ func registerCarStatusConsumer(js jetstream.JetStream, ctx context.Context, coll
 		log.Fatalf("failed to run message consumer: %s", err)
 	}
 }
+
+func registerCarDamageConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
+	carDamageConsumer, err := js.CreateConsumer(
+		ctx,
+		streams.FRaceTelStreamName,
+		jetstream.ConsumerConfig{
+			Durable:       "car_damage_consumer",
+			AckPolicy:     jetstream.AckExplicitPolicy,
+			FilterSubject: streams.CarDamageSubjectName,
+		},
+	)
+	if err != nil {
+		log.Fatalf("failed to create carDamageConsumer: %s", err)
+	}
+
+	_, err = carDamageConsumer.Consume(
+		func(jsMsg jetstream.Msg) {
+			jsMsg.Ack()
+
+			carDamageMessage := messages.CarDamage{}
+
+			message := messages.Message{
+				Header:  messages.Header{},
+				Payload: &carDamageMessage,
+			}
+
+			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+				log.Printf("failed to unmarshal message: %s", err)
+				return
+			}
+
+			carDamage := carDamageFromMessage(carDamageMessage, message.Header)
+
+			log.Printf("received msg with [%s] subject: %+v", streams.CarStatusSubjectName, carDamage)
+
+			insertToCollection(carDamage, collection)
+		},
+	)
+	if err != nil {
+		log.Fatalf("failed to run message consumer: %s", err)
+	}
+}

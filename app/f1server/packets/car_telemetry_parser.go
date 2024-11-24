@@ -21,7 +21,7 @@ func (p carTelemetryPacketParser) ToMessage(header *Header, rawPacket RawPacket)
 	err := binary.Read(buffer, PacketByteOrder, &telemetries)
 
 	if err != nil {
-		log.Printf("Error during reading LapData: %s", err)
+		log.Printf("Error during reading CarTelemetry: %s", err)
 	}
 
 	telemetryPayload := telemetries[header.PlayerCarIdx].ToMessagePayload()

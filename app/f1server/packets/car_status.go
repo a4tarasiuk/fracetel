@@ -87,7 +87,7 @@ func (p carStatusParser) ToMessage(header *Header, rawPacket RawPacket) (
 	err := binary.Read(buffer, PacketByteOrder, &carStatusPackets)
 
 	if err != nil {
-		log.Printf("Error during reading LapData: %s", err)
+		log.Printf("Error during reading CarStatus: %s", err)
 	}
 
 	carStatusPayload := carStatusPackets[header.PlayerCarIdx].ToMessagePayload()

@@ -191,3 +191,26 @@ func carStatusFromMessage(carStatusMessage messages.CarStatus, header messages.H
 		ERSDeployedThisLap:      carStatusMessage.ERSDeployedThisLap,
 	}
 }
+
+type CarDamage struct {
+	SessionID       string    `bson:"session_id"`
+	FrameIdentifier string    `bson:"frame_identifier"`
+	OccurredAt      time.Time `bson:"occurred_at"`
+
+	TyresWear []int `bson:"tyres_wear"`
+
+	Tyres []int `bson:"tyres"`
+
+	Brakes []int `bson:"brakes"`
+}
+
+func carDamageFromMessage(carDamageMessage messages.CarDamage, header messages.Header) CarDamage {
+	return CarDamage{
+		SessionID:       header.SessionID,
+		FrameIdentifier: header.FrameIdentifier,
+		OccurredAt:      header.OccurredAt,
+		TyresWear:       carDamageMessage.TyresWear,
+		Tyres:           carDamageMessage.Tyres,
+		Brakes:          carDamageMessage.Brakes,
+	}
+}

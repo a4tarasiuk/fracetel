@@ -21,6 +21,7 @@ var packetParsersMap = map[ID]PacketParser{
 	LapDataID:      lapTimePacketParser{},
 	CarTelemetryID: carTelemetryPacketParser{},
 	CarStatusID:    carStatusParser{},
+	CarDamageID:    carDamageParser{},
 	SessionID:      sessionParser{},
 }
 
