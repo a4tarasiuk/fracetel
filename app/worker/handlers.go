@@ -100,9 +100,9 @@ func registerSessionConsumer(js jetstream.JetStream, ctx context.Context, collec
 		ctx,
 		streams.FRaceTelStreamName,
 		jetstream.ConsumerConfig{
-			Durable:       "lap_data_consumer",
+			Durable:       "session_consumer",
 			AckPolicy:     jetstream.AckExplicitPolicy,
-			FilterSubject: streams.LapDataSubjectName,
+			FilterSubject: streams.SessionSubjectName,
 		},
 	)
 	if err != nil {
@@ -130,6 +130,48 @@ func registerSessionConsumer(js jetstream.JetStream, ctx context.Context, collec
 			log.Printf("received msg with [%s] subject: %+v", streams.SessionSubjectName, session)
 
 			insertToCollection(session, collection)
+		},
+	)
+	if err != nil {
+		log.Fatalf("failed to run message consumer: %s", err)
+	}
+}
+
+func registerCarStatusConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
+	carStatusConsumer, err := js.CreateConsumer(
+		ctx,
+		streams.FRaceTelStreamName,
+		jetstream.ConsumerConfig{
+			Durable:       "car_status_consumer",
+			AckPolicy:     jetstream.AckExplicitPolicy,
+			FilterSubject: streams.CarStatusSubjectName,
+		},
+	)
+	if err != nil {
+		log.Fatalf("failed to create carStatusConsumer: %s", err)
+	}
+
+	_, err = carStatusConsumer.Consume(
+		func(jsMsg jetstream.Msg) {
+			jsMsg.Ack()
+
+			carStatusMessage := messages.CarStatus{}
+
+			message := messages.Message{
+				Header:  messages.Header{},
+				Payload: &carStatusMessage,
+			}
+
+			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+				log.Printf("failed to unmarshal message: %s", err)
+				return
+			}
+
+			carStatus := carStatusFromMessage(carStatusMessage, message.Header)
+
+			log.Printf("received msg with [%s] subject: %+v", streams.CarStatusSubjectName, carStatus)
+
+			insertToCollection(carStatus, collection)
 		},
 	)
 	if err != nil {

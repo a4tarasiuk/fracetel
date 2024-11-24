@@ -120,3 +120,74 @@ func sessionFromMessage(sessionMessage messages.Session, header messages.Header)
 		Duration:         sessionMessage.Duration,
 	}
 }
+
+type CarStatus struct {
+	SessionID       string    `bson:"session_id"`
+	FrameIdentifier string    `bson:"frame_identifier"`
+	OccurredAt      time.Time `bson:"occurred_at"`
+
+	TractionControl int `bson:"traction_control"`
+	AntiLockBrakes  int `bson:"anti_lock_brakes"`
+
+	FuelMix int `bson:"fuel_mix"`
+
+	FrontBrakeBias int `bson:"front_brake_bias"`
+
+	PutLimiterStatus int `bson:"put_limiter_status"`
+
+	FuelInTank        float32 `bson:"fuel_in_tank"`
+	FuelCapacity      float32 `bson:"fuel_capacity"`
+	FuelRemainingLaps float32 `bson:"fuel_remaining_laps"`
+
+	MaxRPM  int `bson:"max_rpm"`
+	IdleRPM int `bson:"idle_rpm"`
+
+	MaxGears int `bson:"max_gears"`
+
+	DRSAllowed            int `bson:"drs_allowed"`
+	DRSActivationDistance int `bson:"drs_activation_distance"`
+
+	ActualTyreCompound int `bson:"actual_tyre_compound"`
+	VisualTyreCompound int `bson:"visual_tyre_compound"`
+
+	TyresAgeLaps int `bson:"tyres_age_laps"`
+
+	VehicleFIAFlags int `bson:"vehicle_fia_flags"`
+
+	ERSStoreEnergy float32 `bson:"ers_store_energy"`
+	ERSDeployMode  int     `bson:"ers_deploy_mode"`
+
+	ERSHarvestedThisLapMGUK float32 `bson:"ers_harvested_this_lap_mguk"`
+	ERSHarvestedThisLapMGUH float32 `bson:"ers_harvested_this_lap_mguh"`
+	ERSDeployedThisLap      float32 `bson:"ers_deployed_this_lap"`
+}
+
+func carStatusFromMessage(carStatusMessage messages.CarStatus, header messages.Header) CarStatus {
+	return CarStatus{
+		SessionID:               header.SessionID,
+		FrameIdentifier:         header.FrameIdentifier,
+		OccurredAt:              header.OccurredAt,
+		TractionControl:         carStatusMessage.TractionControl,
+		AntiLockBrakes:          carStatusMessage.AntiLockBrakes,
+		FuelMix:                 carStatusMessage.FuelMix,
+		FrontBrakeBias:          carStatusMessage.FrontBrakeBias,
+		PutLimiterStatus:        carStatusMessage.PutLimiterStatus,
+		FuelInTank:              carStatusMessage.FuelInTank,
+		FuelCapacity:            carStatusMessage.FuelCapacity,
+		FuelRemainingLaps:       carStatusMessage.FuelRemainingLaps,
+		MaxRPM:                  carStatusMessage.MaxRPM,
+		IdleRPM:                 carStatusMessage.IdleRPM,
+		MaxGears:                carStatusMessage.MaxGears,
+		DRSAllowed:              carStatusMessage.DRSAllowed,
+		DRSActivationDistance:   carStatusMessage.DRSActivationDistance,
+		ActualTyreCompound:      carStatusMessage.ActualTyreCompound,
+		VisualTyreCompound:      carStatusMessage.VisualTyreCompound,
+		TyresAgeLaps:            carStatusMessage.TyresAgeLaps,
+		VehicleFIAFlags:         carStatusMessage.VehicleFIAFlags,
+		ERSStoreEnergy:          carStatusMessage.ERSStoreEnergy,
+		ERSDeployMode:           carStatusMessage.ERSDeployMode,
+		ERSHarvestedThisLapMGUK: carStatusMessage.ERSHarvestedThisLapMGUK,
+		ERSHarvestedThisLapMGUH: carStatusMessage.ERSHarvestedThisLapMGUH,
+		ERSDeployedThisLap:      carStatusMessage.ERSDeployedThisLap,
+	}
+}
