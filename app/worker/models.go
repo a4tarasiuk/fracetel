@@ -214,3 +214,54 @@ func carDamageFromMessage(carDamageMessage messages.CarDamage, header messages.H
 		Brakes:          carDamageMessage.Brakes,
 	}
 }
+
+type SessionHistory struct {
+	SessionID       string    `bson:"session_id"`
+	FrameIdentifier string    `bson:"frame_identifier"`
+	OccurredAt      time.Time `bson:"occurred_at"`
+
+	NumLaps int `bson:"num_laps"`
+
+	BestLapTimeLapNum int `bson:"best_lap_time_lap_num"`
+
+	BestSector1LapNum int `bson:"best_sector_1_lap_num"`
+	BestSector2LapNum int `bson:"best_sector_2_lap_num"`
+	BestSector3LapNum int `bson:"best_sector_3_lap_num"`
+
+	LapsHistory []LapHistory `bson:"laps_history"`
+}
+
+type LapHistory struct {
+	LapTimeMs int `bson:"lap_time_ms"`
+
+	Sector1Ms int `bson:"sector_1_ms"`
+	Sector2Ms int `bson:"sector_2_ms"`
+	Sector3Ms int `bson:"sector_3_ms"`
+}
+
+func sessionHistoryFromMessage(sessionHistoryMessage messages.SessionHistory, header messages.Header) SessionHistory {
+	lapsHistory := make([]LapHistory, len(sessionHistoryMessage.LapsHistory))
+
+	for idx := 0; idx < len(sessionHistoryMessage.LapsHistory); idx++ {
+		lapHistoryPacket := sessionHistoryMessage.LapsHistory[idx]
+
+		lapsHistory[idx] = LapHistory{
+			LapTimeMs: lapHistoryPacket.LapTimeMs,
+			Sector1Ms: lapHistoryPacket.Sector1Ms,
+			Sector2Ms: lapHistoryPacket.Sector2Ms,
+			Sector3Ms: lapHistoryPacket.Sector3Ms,
+		}
+	}
+
+	return SessionHistory{
+		SessionID:         header.SessionID,
+		FrameIdentifier:   header.FrameIdentifier,
+		OccurredAt:        header.OccurredAt,
+		NumLaps:           sessionHistoryMessage.NumLaps,
+		BestLapTimeLapNum: sessionHistoryMessage.BestLapTimeLapNum,
+		BestSector1LapNum: sessionHistoryMessage.BestSector1LapNum,
+		BestSector2LapNum: sessionHistoryMessage.BestSector2LapNum,
+		BestSector3LapNum: sessionHistoryMessage.BestSector3LapNum,
+		LapsHistory:       lapsHistory,
+	}
+}

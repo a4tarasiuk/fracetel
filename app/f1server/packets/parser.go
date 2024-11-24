@@ -18,11 +18,12 @@ type PacketParser interface {
 }
 
 var packetParsersMap = map[ID]PacketParser{
-	LapDataID:      lapTimePacketParser{},
-	CarTelemetryID: carTelemetryPacketParser{},
-	CarStatusID:    carStatusParser{},
-	CarDamageID:    carDamageParser{},
-	SessionID:      sessionParser{},
+	LapDataID:        lapTimePacketParser{},
+	CarTelemetryID:   carTelemetryPacketParser{},
+	CarStatusID:      carStatusParser{},
+	CarDamageID:      carDamageParser{},
+	SessionID:        sessionParser{},
+	SessionHistoryID: sessionHistoryParser{},
 }
 
 func GetParserForPacket(packetID ID) (PacketParser, error) {

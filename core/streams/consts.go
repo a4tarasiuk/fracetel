@@ -20,13 +20,16 @@ const (
 	CarDamageSubjectName    = FRaceTelStreamName + ".car_damage"
 
 	LapDataSubjectName = FRaceTelStreamName + ".lap_data"
-	SessionSubjectName = FRaceTelStreamName + ".session"
+
+	SessionSubjectName        = FRaceTelStreamName + ".session"
+	SessionHistorySubjectName = FRaceTelStreamName + ".session_history"
 )
 
 var MessageTypeSubjectMap = map[messages.MessageType]string{
-	messages.CarTelemetryMessageType: CarTelemetrySubjectName,
-	messages.CarStatusMessageType:    CarStatusSubjectName,
-	messages.CarDamageMessageType:    CarDamageSubjectName,
-	messages.LapDataMessageType:      LapDataSubjectName,
-	messages.SessionMessageType:      SessionSubjectName,
+	messages.CarTelemetryMessageType:   CarTelemetrySubjectName,
+	messages.CarStatusMessageType:      CarStatusSubjectName,
+	messages.CarDamageMessageType:      CarDamageSubjectName,
+	messages.LapDataMessageType:        LapDataSubjectName,
+	messages.SessionMessageType:        SessionSubjectName,
+	messages.SessionHistoryMessageType: SessionHistorySubjectName,
 }

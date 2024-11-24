@@ -23,6 +23,8 @@ func ConsumeEvents(js jetstream.JetStream, mongoClient *mongo.Client) {
 	registerCarStatusConsumer(js, ctx, mongoDB.Collection("car_status"))
 
 	registerCarDamageConsumer(js, ctx, mongoDB.Collection("car_damage"))
+
+	registerSessionHistoryConsumer(js, ctx, mongoDB.Collection("session_history"))
 }
 
 //
