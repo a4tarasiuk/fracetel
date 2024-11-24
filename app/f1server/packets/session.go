@@ -50,7 +50,7 @@ func (p sessionParser) ToMessage(header *Header, rawPacket RawPacket) (*messages
 	err := binary.Read(buffer, PacketByteOrder, &sessionPacket)
 
 	if err != nil {
-		log.Printf("Error during reading LapData: %s", err)
+		log.Printf("Error during reading Session: %s", err)
 	}
 
 	payload := sessionPacket.ToMessagePayload()
