@@ -4,7 +4,7 @@ import (
 	"fracetel/core/messages"
 )
 
-type LapData struct {
+type lapData struct {
 	LastLapTimeMs    uint32
 	CurrentLapTimeMs uint32
 
@@ -49,7 +49,7 @@ type LapData struct {
 	PitStopShouldServePen uint8
 }
 
-func (ld LapData) ToMessage() messages.LapData {
+func (ld lapData) ToMessagePayload() messages.LapData {
 	return messages.LapData{
 		LastLapTimeMs:      int(ld.LastLapTimeMs),
 		CurrentLapTimeMs:   int(ld.CurrentLapTimeMs),

@@ -4,7 +4,7 @@ import (
 	"fracetel/core/messages"
 )
 
-type CarTelemetry struct {
+type carTelemetry struct {
 	Speed uint16
 
 	Throttle float32
@@ -49,7 +49,7 @@ type CarTelemetry struct {
 	SurfaceType4 uint8
 }
 
-func (ct CarTelemetry) ToMessagePayload() messages.CarTelemetry {
+func (ct carTelemetry) ToMessagePayload() messages.CarTelemetry {
 	return messages.CarTelemetry{
 		Speed:     int(ct.Speed),
 		Throttle:  ct.Throttle,

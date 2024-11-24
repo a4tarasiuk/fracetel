@@ -20,6 +20,7 @@ type PacketParser interface {
 var packetParsersMap = map[ID]PacketParser{
 	LapDataID:      lapTimePacketParser{},
 	CarTelemetryID: carTelemetryPacketParser{},
+	SessionID:      sessionParser{},
 }
 
 func GetParserForPacket(packetID ID) (PacketParser, error) {

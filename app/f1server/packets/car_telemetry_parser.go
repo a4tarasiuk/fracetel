@@ -14,7 +14,7 @@ func (p carTelemetryPacketParser) ToMessage(header *Header, rawPacket RawPacket)
 	*messages.Message,
 	error,
 ) {
-	telemetries := make([]CarTelemetry, F1TotalCars)
+	telemetries := make([]carTelemetry, F1TotalCars)
 
 	buffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
 
