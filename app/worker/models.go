@@ -265,3 +265,29 @@ func sessionHistoryFromMessage(sessionHistoryMessage messages.SessionHistory, he
 		LapsHistory:       lapsHistory,
 	}
 }
+
+type FinalClassification struct {
+	SessionID       string    `bson:"session_id"`
+	FrameIdentifier string    `bson:"frame_identifier"`
+	OccurredAt      time.Time `bson:"occurred_at"`
+
+	FinishingPosition int `bson:"finishing_position"`
+
+	StartingPosition int `bson:"starting_position"`
+
+	BestLapTimeMs float32 `bson:"best_lap_time_ms"`
+}
+
+func finalClassificationFromMessage(
+	finalClassificationMessage messages.FinalClassification,
+	header messages.Header,
+) FinalClassification {
+	return FinalClassification{
+		SessionID:         header.SessionID,
+		FrameIdentifier:   header.FrameIdentifier,
+		OccurredAt:        header.OccurredAt,
+		FinishingPosition: finalClassificationMessage.FinishingPosition,
+		StartingPosition:  finalClassificationMessage.StartingPosition,
+		BestLapTimeMs:     finalClassificationMessage.BestLapTimeMs,
+	}
+}

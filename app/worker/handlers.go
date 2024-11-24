@@ -262,3 +262,49 @@ func registerSessionHistoryConsumer(js jetstream.JetStream, ctx context.Context,
 		log.Fatalf("failed to run message consumer: %s", err)
 	}
 }
+
+func registerFinalClassificationConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
+	finalClassificationConsumer, err := js.CreateConsumer(
+		ctx,
+		streams.FRaceTelStreamName,
+		jetstream.ConsumerConfig{
+			Durable:       "final_classification_consumer",
+			AckPolicy:     jetstream.AckExplicitPolicy,
+			FilterSubject: streams.FinalClassificationSubjectName,
+		},
+	)
+	if err != nil {
+		log.Fatalf("failed to create finalClassificationConsumer: %s", err)
+	}
+
+	_, err = finalClassificationConsumer.Consume(
+		func(jsMsg jetstream.Msg) {
+			jsMsg.Ack()
+
+			finalClassificationMessage := messages.FinalClassification{}
+
+			message := messages.Message{
+				Header:  messages.Header{},
+				Payload: &finalClassificationMessage,
+			}
+
+			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+				log.Printf("failed to unmarshal message: %s", err)
+				return
+			}
+
+			finalClassification := finalClassificationFromMessage(finalClassificationMessage, message.Header)
+
+			log.Printf(
+				"received msg with [%s] subject: %+v",
+				streams.FinalClassificationSubjectName,
+				finalClassification,
+			)
+
+			insertToCollection(finalClassification, collection)
+		},
+	)
+	if err != nil {
+		log.Fatalf("failed to run message consumer: %s", err)
+	}
+}

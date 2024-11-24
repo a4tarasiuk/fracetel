@@ -11,6 +11,8 @@ const (
 	SessionMessageType        MessageType = "SESSION"
 	SessionHistoryMessageType MessageType = "SESSION_HISTORY"
 
+	FinalClassificationMessageType MessageType = "FINAL_CLASSIFICATION"
+
 	SessionStartedMessageType  MessageType = "SESSION_STARTED"
 	SessionFinishedMessageType MessageType = "SESSION_FINISHED"
 )
