@@ -12,7 +12,7 @@ type lapTimePacketParser struct{}
 
 func (p lapTimePacketParser) ToMessage(header *Header, rawPacket RawPacket) (*messages.Message, error) {
 
-	lapDataPacket := make([]LapData, F1TotalCars)
+	lapDataPacket := make([]lapData, F1TotalCars)
 
 	buffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
 
@@ -22,7 +22,7 @@ func (p lapTimePacketParser) ToMessage(header *Header, rawPacket RawPacket) (*me
 		log.Printf("Error during reading LapData: %s", err)
 	}
 
-	lapData := lapDataPacket[header.PlayerCarIdx].ToMessage()
+	lapData := lapDataPacket[header.PlayerCarIdx].ToMessagePayload()
 
 	msg := messages.New(
 		messages.LapDataMessageType,

@@ -85,9 +85,51 @@ func registerLapDataConsumer(js jetstream.JetStream, ctx context.Context, collec
 
 			lapData := lapDataFromMessage(lapDataMessage, message.Header)
 
-			log.Printf("received msg with [%s] subject: %+v", streams.CarTelemetrySubjectName, lapData)
+			log.Printf("received msg with [%s] subject: %+v", streams.LapDataSubjectName, lapData)
 
 			insertToCollection(lapData, collection)
+		},
+	)
+	if err != nil {
+		log.Fatalf("failed to run message consumer: %s", err)
+	}
+}
+
+func registerSessionConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
+	sessionConsumer, err := js.CreateConsumer(
+		ctx,
+		streams.FRaceTelStreamName,
+		jetstream.ConsumerConfig{
+			Durable:       "lap_data_consumer",
+			AckPolicy:     jetstream.AckExplicitPolicy,
+			FilterSubject: streams.LapDataSubjectName,
+		},
+	)
+	if err != nil {
+		log.Fatalf("failed to create sessionConsumer: %s", err)
+	}
+
+	_, err = sessionConsumer.Consume(
+		func(jsMsg jetstream.Msg) {
+			jsMsg.Ack()
+
+			sessionMessage := messages.Session{}
+
+			message := messages.Message{
+				Header:  messages.Header{},
+				Payload: &sessionMessage,
+			}
+
+			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+				log.Printf("failed to unmarshal message: %s", err)
+				return
+			}
+
+			session := sessionFromMessage(sessionMessage, message.Header)
+
+			log.Printf("received msg with [%s] subject: %+v", streams.SessionSubjectName, session)
+
+			insertToCollection(session, collection)
 		},
 	)
 	if err != nil {

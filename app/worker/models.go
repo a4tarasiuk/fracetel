@@ -83,3 +83,40 @@ func lapDataFromMessage(lapDataMessage messages.LapData, header messages.Header)
 		DriverStatus:       lapDataMessage.DriverStatus,
 	}
 }
+
+type Session struct {
+	SessionID       string    `bson:"session_id"`
+	FrameIdentifier string    `bson:"frame_identifier"`
+	OccurredAt      time.Time `bson:"occurred_at"`
+
+	Weather int `bson:"weather"`
+
+	TrackTemperature int `bson:"track_temperature"`
+	AirTemperature   int `bson:"air_temperature"`
+
+	TotalLaps   int `bson:"total_laps"`
+	TrackLength int `bson:"track_length"`
+	TrackID     int `bson:"track_id"`
+
+	Type int `bson:"type"`
+
+	TimeLeft int `bson:"time_left"`
+	Duration int `bson:"duration"`
+}
+
+func sessionFromMessage(sessionMessage messages.Session, header messages.Header) Session {
+	return Session{
+		SessionID:        header.SessionID,
+		FrameIdentifier:  header.FrameIdentifier,
+		OccurredAt:       header.OccurredAt,
+		Weather:          sessionMessage.Weather,
+		TrackTemperature: sessionMessage.TrackTemperature,
+		AirTemperature:   sessionMessage.AirTemperature,
+		TotalLaps:        sessionMessage.TotalLaps,
+		TrackLength:      sessionMessage.TrackLength,
+		TrackID:          sessionMessage.TrackID,
+		Type:             sessionMessage.Type,
+		TimeLeft:         sessionMessage.TimeLeft,
+		Duration:         sessionMessage.Duration,
+	}
+}

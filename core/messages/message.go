@@ -24,7 +24,7 @@ type Message struct {
 }
 
 type genericMessage interface {
-	CarTelemetry | LapData | struct{}
+	CarTelemetry | LapData | Session | struct{}
 }
 
 var EmptyPayload struct{}

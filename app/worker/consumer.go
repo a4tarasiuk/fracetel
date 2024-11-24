@@ -12,11 +12,13 @@ func ConsumeEvents(js jetstream.JetStream, mongoClient *mongo.Client) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	carTelemetryCollection := mongoClient.Database("fracetel").Collection("car_telemetry")
+	mongoDB := mongoClient.Database("fracetel")
 
-	registerCarTelemetryConsumer(js, ctx, carTelemetryCollection)
+	registerCarTelemetryConsumer(js, ctx, mongoDB.Collection("car_telemetry"))
 
-	registerLapDataConsumer(js, ctx, mongoClient.Database("fracetel").Collection("lap_data"))
+	registerLapDataConsumer(js, ctx, mongoDB.Collection("lap_data"))
+
+	registerSessionConsumer(js, ctx, mongoDB.Collection("session"))
 
 }
 
