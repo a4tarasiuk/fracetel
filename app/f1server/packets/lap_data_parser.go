@@ -12,23 +12,27 @@ type lapTimePacketParser struct{}
 
 func (p lapTimePacketParser) ToMessage(header *Header, rawPacket RawPacket) (*messages.Message, error) {
 
-	lapData := make([]LapData, F1TotalCars)
+	lapDataPacket := make([]LapData, F1TotalCars)
 
 	buffer := bytes.NewBuffer(rawPacket[HeaderTotalBytes:])
 
-	err := binary.Read(buffer, binary.LittleEndian, &lapData)
+	err := binary.Read(buffer, PacketByteOrder, &lapDataPacket)
 
 	if err != nil {
 		log.Printf("Error during reading LapData: %s", err)
 	}
 
-	// frtLapData := lapData[header.PlayerCarIdx].ToFRT()
+	lapData := lapDataPacket[header.PlayerCarIdx].ToMessage()
 
-	// msg := messages.New(messages.LapDataMessageType, header.SessionUID, &frtLapData)
-	//
-	// log.Printf("Lap Data: %+v\n", msg.Payload)
-	//
-	// return &msg, nil
+	msg := messages.New(
+		messages.LapDataMessageType,
+		header.SessionUID,
+		header.PacketID,
+		header.FrameIdentifier,
+		&lapData,
+	)
 
-	return nil, nil
+	log.Printf("Lap Data: %+v\n", msg.Payload)
+
+	return &msg, nil
 }

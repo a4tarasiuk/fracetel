@@ -2,12 +2,8 @@ package worker
 
 import (
 	"context"
-	"encoding/json"
-	"log"
 	"time"
 
-	"fracetel/core/messages"
-	"fracetel/core/streams"
 	"github.com/nats-io/nats.go/jetstream"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -16,47 +12,11 @@ func ConsumeEvents(js jetstream.JetStream, mongoClient *mongo.Client) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	carTelemetryConsumer, err := js.CreateConsumer(
-		ctx,
-		streams.FRaceTelStreamName,
-		jetstream.ConsumerConfig{
-			Durable:       "car_telemetry_consumer",
-			AckPolicy:     jetstream.AckExplicitPolicy,
-			FilterSubject: streams.CarTelemetrySubjectName,
-		},
-	)
-	if err != nil {
-		log.Fatalf("failed to create sessionStartedConsumer: %s", err)
-	}
+	carTelemetryCollection := mongoClient.Database("fracetel").Collection("car_telemetry")
 
-	carTelemetryCollection := mongoClient.Database("fracetel").Collection("car_telemetries")
+	registerCarTelemetryConsumer(js, ctx, carTelemetryCollection)
 
-	_, err = carTelemetryConsumer.Consume(
-		func(jsMsg jetstream.Msg) {
-			jsMsg.Ack()
-
-			carTelemetryMessage := messages.CarTelemetry{}
-
-			message := messages.Message{
-				Header:  messages.Header{},
-				Payload: &carTelemetryMessage,
-			}
-
-			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
-				log.Printf("failed to unmarshal message: %s", err)
-				return
-			}
-
-			carTelemetry := carTelemetryFromMessage(carTelemetryMessage, message.Header)
-
-			log.Printf("received msg with [%s] subject: %+v", streams.CarTelemetrySubjectName, carTelemetry)
-
-			createCarTelemetryRecord(carTelemetry, carTelemetryCollection)
-		},
-	)
-	if err != nil {
-		log.Fatalf("failed to run message consumer: %s", err)
-	}
+	registerLapDataConsumer(js, ctx, mongoClient.Database("fracetel").Collection("lap_data"))
 
 }
 

@@ -43,3 +43,43 @@ func carTelemetryFromMessage(telemetry messages.CarTelemetry, header messages.He
 
 	return carTelemetry
 }
+
+type LapData struct {
+	SessionID       string    `bson:"session_id"`
+	FrameIdentifier string    `bson:"frame_identifier"`
+	OccurredAt      time.Time `bson:"occurred_at"`
+
+	LastLapTimeMs    int `bson:"last_lap_time_ms"`
+	CurrentLapTimeMs int `bson:"current_lap_time_ms"`
+
+	FirstSectorTimeMs  int `bson:"first_sector_time_ms"`
+	SecondSectorTimeMs int `bson:"second_sector_time_ms"`
+	Sector             int `bson:"sector"`
+
+	LapDistance   float32 `bson:"lap_distance"`
+	TotalDistance float32 `bson:"total_distance"`
+
+	CarPosition int `bson:"car_position"`
+
+	CurrentLapNum int `bson:"current_lap_num"`
+
+	DriverStatus int `bson:"driver_status"`
+}
+
+func lapDataFromMessage(lapDataMessage messages.LapData, header messages.Header) LapData {
+	return LapData{
+		SessionID:          header.SessionID,
+		FrameIdentifier:    header.FrameIdentifier,
+		OccurredAt:         header.OccurredAt,
+		LastLapTimeMs:      lapDataMessage.LastLapTimeMs,
+		CurrentLapTimeMs:   lapDataMessage.CurrentLapTimeMs,
+		FirstSectorTimeMs:  lapDataMessage.FirstSectorTimeMs,
+		SecondSectorTimeMs: lapDataMessage.SecondSectorTimeMs,
+		Sector:             lapDataMessage.Sector,
+		LapDistance:        lapDataMessage.LapDistance,
+		TotalDistance:      lapDataMessage.TotalDistance,
+		CarPosition:        lapDataMessage.CarPosition,
+		CurrentLapNum:      lapDataMessage.CurrentLapNum,
+		DriverStatus:       lapDataMessage.DriverStatus,
+	}
+}
