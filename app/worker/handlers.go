@@ -45,7 +45,7 @@ func registerCarTelemetryConsumer(js jetstream.JetStream, ctx context.Context, c
 
 			log.Printf("received msg with [%s] subject: %+v", streams.CarTelemetrySubjectName, carTelemetry)
 
-			createCarTelemetryRecord(carTelemetry, collection)
+			insertToCollection(carTelemetry, collection)
 		},
 	)
 	if err != nil {
