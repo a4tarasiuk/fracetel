@@ -14,7 +14,13 @@ func TelemetryMessageProcessor(
 ) {
 	for telMessage := range telMessageChan {
 
-		if err := eventStream.Publish(context.TODO(), telemetry.FRaceTelTopicName, telMessage); err != nil {
+		topicName, ok := telemetry.MessageTypeTopicMap[telMessage.Type]
+
+		if !ok {
+			continue
+		}
+
+		if err := eventStream.Publish(context.TODO(), topicName, telMessage); err != nil {
 			log.Printf("failed to publish message: %+v", telMessage)
 		}
 	}

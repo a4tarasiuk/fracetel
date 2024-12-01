@@ -7,6 +7,7 @@ import (
 
 	"fracetel/app/f1tel"
 	"fracetel/app/web"
+	"fracetel/app/worker"
 	"fracetel/internal/infra"
 	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -29,6 +30,8 @@ func main() {
 		}
 	}()
 
+	mongoDB := mongoClient.Database("fracetel")
+
 	natsConn, err := nats.Connect(nats.DefaultURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to NATS %s", err)
@@ -40,7 +43,7 @@ func main() {
 
 	go f1TelemetryServer.StartAndListen()
 
-	// go worker.ConsumeEvents(js, mongoClient)
+	go worker.ConsumeEvents(natsConn, mongoDB)
 
 	go web.StartWsServerAndListen(natsConn)
 

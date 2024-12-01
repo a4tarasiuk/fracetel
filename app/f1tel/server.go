@@ -3,8 +3,8 @@ package f1tel
 import (
 	"log"
 	"net"
-	"time"
 
+	"fracetel/app/f1tel/packets"
 	"fracetel/core/telemetry"
 	"fracetel/internal/messaging"
 )
@@ -50,52 +50,35 @@ func (s *telemetryServer) StartAndListen() {
 
 	go TelemetryMessageProcessor(s.eventStream, telMessageChan)
 
-	time.Sleep(time.Second * 3)
+	for {
+		buffer := make([]byte, BufferSizeBytes)
 
-	msg := telemetry.NewMessage(
-		telemetry.CarTelemetryMessageType, 4325, 435, &telemetry.CarTelemetry{
-			Speed:                  313,
-			Throttle:               1,
-			Steer:                  0.1,
-			Brake:                  0,
-			EngineRPM:              11101,
-			DRS:                    1,
-			TyreSurfaceTemperature: []int{99, 101, 98, 101},
-			TyreInnerTemperature:   nil,
-		},
-	)
+		nRead, _, err := conn.ReadFrom(buffer)
 
-	telMessageChan <- &msg
+		if err != nil {
+			log.Printf("Error during reading packets: %v\n", err)
+		}
 
-	// for {
-	// 	buffer := make([]byte, BufferSizeBytes)
-	//
-	// 	nRead, _, err := conn.ReadFrom(buffer)
-	//
-	// 	if err != nil {
-	// 		log.Printf("Error during reading packets: %v\n", err)
-	// 	}
-	//
-	// 	rawPacket := buffer[:nRead]
-	//
-	// 	header, err := packets.ParserPacketHeader(rawPacket)
-	// 	if err != nil {
-	// 		log.Printf("Error during reading Message: %s", err)
-	// 		continue
-	// 	}
-	//
-	// 	packetID := packets.ID(header.PacketID)
-	//
-	// 	parser, err := packets.GetParserForPacket(packetID)
-	// 	if err != nil {
-	// 		continue
-	// 	}
-	//
-	// 	telMessage, err := parser.ToTelemetryMessage(header, rawPacket)
-	// 	if err != nil {
-	// 		continue
-	// 	}
-	//
-	// 	telMessageChan <- telMessage
-	// }
+		rawPacket := buffer[:nRead]
+
+		header, err := packets.ParserPacketHeader(rawPacket)
+		if err != nil {
+			log.Printf("Error during reading Message: %s", err)
+			continue
+		}
+
+		packetID := packets.ID(header.PacketID)
+
+		parser, err := packets.GetParserForPacket(packetID)
+		if err != nil {
+			continue
+		}
+
+		telMessage, err := parser.ToTelemetryMessage(header, rawPacket)
+		if err != nil {
+			continue
+		}
+
+		telMessageChan <- telMessage
+	}
 }
