@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
 )
 
 type lapData struct {
@@ -53,8 +53,8 @@ type lapData struct {
 	PitStopShouldServePen uint8
 }
 
-func (ld lapData) ToMessagePayload() messages.LapData {
-	return messages.LapData{
+func (ld lapData) ToTelemetryMessagePayload() telemetry.LapData {
+	return telemetry.LapData{
 		LastLapTimeMs:      int(ld.LastLapTimeMs),
 		CurrentLapTimeMs:   int(ld.CurrentLapTimeMs),
 		FirstSectorTimeMs:  int(ld.FirstSectorTimeMs),
@@ -70,7 +70,10 @@ func (ld lapData) ToMessagePayload() messages.LapData {
 
 type LapTimePacketParser struct{}
 
-func (p LapTimePacketParser) ToMessage(header *Header, rawPacket RawPacket) (*messages.Message, error) {
+func (p LapTimePacketParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+	*telemetry.Message,
+	error,
+) {
 
 	lapDataPacket := make([]lapData, F1TotalCars)
 
@@ -82,14 +85,13 @@ func (p LapTimePacketParser) ToMessage(header *Header, rawPacket RawPacket) (*me
 		log.Printf("Error during reading LapData: %s", err)
 	}
 
-	lapData := lapDataPacket[header.PlayerCarIdx].ToMessagePayload()
+	lapDataPayload := lapDataPacket[header.PlayerCarIdx].ToTelemetryMessagePayload()
 
-	msg := messages.New(
-		messages.LapDataMessageType,
+	msg := telemetry.NewMessage(
+		telemetry.LapDataMessageType,
 		header.SessionUID,
-		header.PacketID,
 		header.FrameIdentifier,
-		&lapData,
+		&lapDataPayload,
 	)
 
 	log.Printf("Lap Data: %+v\n", msg.Payload)

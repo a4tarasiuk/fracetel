@@ -1,4 +1,4 @@
-package messages
+package telemetry
 
 type CarDamage struct {
 	TyresWear []int

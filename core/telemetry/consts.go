@@ -1,4 +1,4 @@
-package messages
+package telemetry
 
 type MessageType string
 
@@ -15,4 +15,9 @@ const (
 
 	SessionStartedMessageType  MessageType = "SESSION_STARTED"
 	SessionFinishedMessageType MessageType = "SESSION_FINISHED"
+)
+
+const (
+	FRaceTelStreamName = "fracetel_logs"
+	FRaceTelTopicName  = FRaceTelStreamName + ".*"
 )

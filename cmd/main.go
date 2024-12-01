@@ -2,29 +2,25 @@ package main
 
 import (
 	"context"
+	"log"
 	"net"
-	"time"
 
 	"fracetel/app/f1tel"
-	"fracetel/app/worker"
+	"fracetel/app/web"
 	"fracetel/internal/infra"
+	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func main() {
+	// TODO:
+	//  1. Create module interface that accepts all the infra staff (natsConn, mongo.Database)
+	//  2. Add implementation that creates needed interface implementations with provided infra objects
+	//  3. Allow to start-up the sub-applications via module interface
+	//  The main goal is to encapsulate infra staff and module logic with componenets
+
 	foreverCh := make(chan int)
-
-	// TODO: Move JetsStream init to ./internal/rabbitmq package.
-	// 	Create Infra struct and encapsulate all infrastructure initialization there
-
-	// go web.StartWsServer("amqp://guest:guest@localhost:5672/")
-
-	// In the `jetstream` package, almost all API calls rely on `context.Context` for timeout/cancellation handling
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	js := infra.InitJetStream(ctx)
 
 	mongoClient, _ := mongo.Connect(options.Client().ApplyURI("mongodb://root:example@localhost:27017"))
 	defer func() {
@@ -33,16 +29,20 @@ func main() {
 		}
 	}()
 
-	messageStream := f1tel.NewJetStreamMessagePublisher(js)
+	natsConn, err := nats.Connect(nats.DefaultURL)
+	if err != nil {
+		log.Fatalf("Failed to connect to NATS %s", err)
+	}
 
-	f1TelemetryServer := f1tel.NewTelemetryServer(net.IPv4(0, 0, 0, 0), 20777, messageStream)
+	natsEventStream := infra.NewNatsEventStream(natsConn)
+
+	f1TelemetryServer := f1tel.NewTelemetryServer(net.IPv4(0, 0, 0, 0), 20777, natsEventStream)
 
 	go f1TelemetryServer.StartAndListen()
 
-	go worker.ConsumeEvents(js, mongoClient)
+	// go worker.ConsumeEvents(js, mongoClient)
 
-	//
-	// go web.StartWsServer()
+	go web.StartWsServerAndListen(natsConn)
 
 	<-foreverCh
 }

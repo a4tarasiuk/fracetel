@@ -1,4 +1,4 @@
-package messages
+package telemetry
 
 type Session struct {
 	Weather int

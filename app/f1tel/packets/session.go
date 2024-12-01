@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
 )
 
 type session struct {
@@ -24,8 +24,8 @@ type session struct {
 	Duration uint16
 }
 
-func (s session) ToMessagePayload() messages.Session {
-	return messages.Session{
+func (s session) ToTelemetryMessagePayload() telemetry.Session {
+	return telemetry.Session{
 		Weather:          int(s.Weather),
 		TrackTemperature: int(s.TrackTemperature),
 		AirTemperature:   int(s.AirTemperature),
@@ -41,7 +41,10 @@ func (s session) ToMessagePayload() messages.Session {
 type sessionParser struct {
 }
 
-func (p sessionParser) ToMessage(header *Header, rawPacket RawPacket) (*messages.Message, error) {
+func (p sessionParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+	*telemetry.Message,
+	error,
+) {
 
 	sessionPacket := session{}
 
@@ -53,12 +56,11 @@ func (p sessionParser) ToMessage(header *Header, rawPacket RawPacket) (*messages
 		log.Printf("Error during reading Session: %s", err)
 	}
 
-	payload := sessionPacket.ToMessagePayload()
+	payload := sessionPacket.ToTelemetryMessagePayload()
 
-	msg := messages.New(
-		messages.SessionMessageType,
+	msg := telemetry.NewMessage(
+		telemetry.SessionMessageType,
 		header.SessionUID,
-		header.PacketID,
 		header.FrameIdentifier,
 		&payload,
 	)

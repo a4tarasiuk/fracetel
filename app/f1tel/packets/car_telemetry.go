@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
 )
 
 type carTelemetry struct {
@@ -38,8 +38,8 @@ type carTelemetry struct {
 	SurfaceType [4]uint8
 }
 
-func (ct carTelemetry) ToMessagePayload() messages.CarTelemetry {
-	return messages.CarTelemetry{
+func (ct carTelemetry) ToTelemetryMessagePayload() telemetry.CarTelemetry {
+	return telemetry.CarTelemetry{
 		Speed:     int(ct.Speed),
 		Throttle:  ct.Throttle,
 		Steer:     ct.Steer,
@@ -63,8 +63,8 @@ func (ct carTelemetry) ToMessagePayload() messages.CarTelemetry {
 
 type CarTelemetryPacketParser struct{}
 
-func (p CarTelemetryPacketParser) ToMessage(header *Header, rawPacket RawPacket) (
-	*messages.Message,
+func (p CarTelemetryPacketParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+	*telemetry.Message,
 	error,
 ) {
 	telemetries := make([]carTelemetry, F1TotalCars)
@@ -77,12 +77,11 @@ func (p CarTelemetryPacketParser) ToMessage(header *Header, rawPacket RawPacket)
 		log.Printf("Error during reading CarTelemetry: %s", err)
 	}
 
-	telemetryPayload := telemetries[header.PlayerCarIdx].ToMessagePayload()
+	telemetryPayload := telemetries[header.PlayerCarIdx].ToTelemetryMessagePayload()
 
-	msg := messages.New(
-		messages.CarTelemetryMessageType,
+	msg := telemetry.NewMessage(
+		telemetry.CarTelemetryMessageType,
 		header.SessionUID,
-		header.PacketID,
 		header.FrameIdentifier,
 		&telemetryPayload,
 	)

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/nats-io/nats.go"
 )
@@ -13,7 +13,7 @@ type webSocketHandler struct {
 	upgrader websocket.Upgrader
 
 	natsConn      *nats.Conn
-	telemetryChan <-chan *messages.Message
+	telemetryChan <-chan *telemetry.Message
 }
 
 func (wsh webSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func (wsh webSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	_, err = wsh.natsConn.Subscribe(
-		"telemetry.*", func(msg *nats.Msg) {
+		telemetry.FRaceTelTopicName, func(msg *nats.Msg) {
 
 			if err = conn.WriteMessage(websocket.TextMessage, msg.Data); err != nil {
 				log.Printf("Error %s when sending message to client", err)
@@ -54,13 +54,8 @@ func (wsh webSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func StartWsServer() {
-	natsConn, err := nats.Connect(nats.DefaultURL)
-	if err != nil {
-		log.Fatalf("Failed to connect to NATS core from ws server: %s", err)
-	}
-
-	telemetryChan := make(chan *messages.Message)
+func StartWsServerAndListen(natsConn *nats.Conn) {
+	telemetryChan := make(chan *telemetry.Message)
 
 	wsHandler := webSocketHandler{
 		upgrader:      websocket.Upgrader{},

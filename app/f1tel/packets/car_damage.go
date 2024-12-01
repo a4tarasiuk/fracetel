@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
 )
 
 type carDamage struct {
@@ -42,8 +42,8 @@ type carDamage struct {
 	EngineSeized   uint8
 }
 
-func (cd carDamage) ToMessagePayload() messages.CarDamage {
-	return messages.CarDamage{
+func (cd carDamage) ToTelemetryMessagePayload() telemetry.CarDamage {
+	return telemetry.CarDamage{
 		Tyres:     []int{int(cd.Tyres[0]), int(cd.Tyres[1]), int(cd.Tyres[2]), int(cd.Tyres[3])},
 		TyresWear: []int{int(cd.TyresWear[0]), int(cd.TyresWear[1]), int(cd.TyresWear[2]), int(cd.TyresWear[3])},
 		Brakes:    []int{int(cd.Brakes[0]), int(cd.Brakes[1]), int(cd.Brakes[2]), int(cd.Brakes[3])},
@@ -52,8 +52,8 @@ func (cd carDamage) ToMessagePayload() messages.CarDamage {
 
 type carDamageParser struct{}
 
-func (p carDamageParser) ToMessage(header *Header, rawPacket RawPacket) (
-	*messages.Message,
+func (p carDamageParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+	*telemetry.Message,
 	error,
 ) {
 	carDamagePackets := make([]carDamage, F1TotalCars)
@@ -66,12 +66,11 @@ func (p carDamageParser) ToMessage(header *Header, rawPacket RawPacket) (
 		log.Printf("Error during reading CarDamage: %s", err)
 	}
 
-	carDamagePayload := carDamagePackets[header.PlayerCarIdx].ToMessagePayload()
+	carDamagePayload := carDamagePackets[header.PlayerCarIdx].ToTelemetryMessagePayload()
 
-	msg := messages.New(
-		messages.CarDamageMessageType,
+	msg := telemetry.NewMessage(
+		telemetry.CarDamageMessageType,
 		header.SessionUID,
-		header.PacketID,
 		header.FrameIdentifier,
 		&carDamagePayload,
 	)

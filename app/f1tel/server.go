@@ -3,9 +3,10 @@ package f1tel
 import (
 	"log"
 	"net"
+	"time"
 
-	"fracetel/app/f1tel/packets"
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
+	"fracetel/internal/messaging"
 )
 
 const BufferSizeBytes = 2048
@@ -14,18 +15,18 @@ type telemetryServer struct {
 	addr net.IP
 	port int
 
-	messageStream MessagePublisher
+	eventStream messaging.EventStream
 }
 
 func NewTelemetryServer(
 	addr net.IP,
 	port int,
-	messageStream MessagePublisher,
+	eventStream messaging.EventStream,
 ) *telemetryServer {
 	return &telemetryServer{
-		addr:          addr,
-		port:          port,
-		messageStream: messageStream,
+		addr:        addr,
+		port:        port,
+		eventStream: eventStream,
 	}
 }
 
@@ -45,39 +46,56 @@ func (s *telemetryServer) StartAndListen() {
 
 	log.Printf("Listening on %d", s.port)
 
-	messageChan := make(chan *messages.Message)
+	telMessageChan := make(chan *telemetry.Message)
 
-	go MessageProcessor(s.messageStream, messageChan)
+	go TelemetryMessageProcessor(s.eventStream, telMessageChan)
 
-	for {
-		buffer := make([]byte, BufferSizeBytes)
+	time.Sleep(time.Second * 3)
 
-		nRead, _, err := conn.ReadFrom(buffer)
+	msg := telemetry.NewMessage(
+		telemetry.CarTelemetryMessageType, 4325, 435, &telemetry.CarTelemetry{
+			Speed:                  313,
+			Throttle:               1,
+			Steer:                  0.1,
+			Brake:                  0,
+			EngineRPM:              11101,
+			DRS:                    1,
+			TyreSurfaceTemperature: []int{99, 101, 98, 101},
+			TyreInnerTemperature:   nil,
+		},
+	)
 
-		if err != nil {
-			log.Printf("Error during reading packets: %v\n", err)
-		}
+	telMessageChan <- &msg
 
-		rawPacket := buffer[:nRead]
-
-		header, err := packets.ParserPacketHeader(rawPacket)
-		if err != nil {
-			log.Printf("Error during reading Message: %s", err)
-			continue
-		}
-
-		packetID := packets.ID(header.PacketID)
-
-		parser, err := packets.GetParserForPacket(packetID)
-		if err != nil {
-			continue
-		}
-
-		message, err := parser.ToMessage(header, rawPacket)
-		if err != nil {
-			continue
-		}
-
-		messageChan <- message
-	}
+	// for {
+	// 	buffer := make([]byte, BufferSizeBytes)
+	//
+	// 	nRead, _, err := conn.ReadFrom(buffer)
+	//
+	// 	if err != nil {
+	// 		log.Printf("Error during reading packets: %v\n", err)
+	// 	}
+	//
+	// 	rawPacket := buffer[:nRead]
+	//
+	// 	header, err := packets.ParserPacketHeader(rawPacket)
+	// 	if err != nil {
+	// 		log.Printf("Error during reading Message: %s", err)
+	// 		continue
+	// 	}
+	//
+	// 	packetID := packets.ID(header.PacketID)
+	//
+	// 	parser, err := packets.GetParserForPacket(packetID)
+	// 	if err != nil {
+	// 		continue
+	// 	}
+	//
+	// 	telMessage, err := parser.ToTelemetryMessage(header, rawPacket)
+	// 	if err != nil {
+	// 		continue
+	// 	}
+	//
+	// 	telMessageChan <- telMessage
+	// }
 }

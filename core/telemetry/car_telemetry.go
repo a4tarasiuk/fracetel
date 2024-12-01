@@ -1,4 +1,4 @@
-package messages
+package telemetry
 
 type CarTelemetry struct {
 	Speed int `json:"speed"`
