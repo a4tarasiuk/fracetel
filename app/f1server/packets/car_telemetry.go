@@ -25,32 +25,17 @@ type carTelemetry struct {
 	RevLightsPercent  uint8
 	RevLightsBitValue uint16
 
-	BrakesTemperatureRL uint16
-	BrakesTemperatureRR uint16
-	BrakesTemperatureFL uint16
-	BrakesTemperatureFR uint16
+	BrakesTemperature [4]uint16
 
-	TyresSurfaceTemperatureRL uint8
-	TyresSurfaceTemperatureRR uint8
-	TyresSurfaceTemperatureFL uint8
-	TyresSurfaceTemperatureFR uint8
+	TyresSurfaceTemperature [4]uint8
 
-	TyresInnerTemperatureRL uint8
-	TyresInnerTemperatureRR uint8
-	TyresInnerTemperatureFL uint8
-	TyresInnerTemperatureFR uint8
+	TyresInnerTemperature [4]uint8
 
 	EngineTemperature uint16
 
-	TyresPressureRL float32
-	TyresPressureRR float32
-	TyresPressureFL float32
-	TyresPressureFR float32
+	TyresPressure [4]float32
 
-	SurfaceType1 uint8
-	SurfaceType2 uint8
-	SurfaceType3 uint8
-	SurfaceType4 uint8
+	SurfaceType [4]uint8
 }
 
 func (ct carTelemetry) ToMessagePayload() messages.CarTelemetry {
@@ -62,16 +47,16 @@ func (ct carTelemetry) ToMessagePayload() messages.CarTelemetry {
 		EngineRPM: int(ct.EngineRPM),
 		DRS:       ct.DRS,
 		TyreSurfaceTemperature: []int{
-			int(ct.TyresSurfaceTemperatureRL),
-			int(ct.TyresSurfaceTemperatureRR),
-			int(ct.TyresSurfaceTemperatureFL),
-			int(ct.TyresSurfaceTemperatureFR),
+			int(ct.TyresSurfaceTemperature[0]),
+			int(ct.TyresSurfaceTemperature[1]),
+			int(ct.TyresSurfaceTemperature[2]),
+			int(ct.TyresSurfaceTemperature[3]),
 		},
 		TyreInnerTemperature: []int{
-			int(ct.TyresInnerTemperatureRL),
-			int(ct.TyresInnerTemperatureRR),
-			int(ct.TyresInnerTemperatureFL),
-			int(ct.TyresInnerTemperatureFR),
+			int(ct.TyresInnerTemperature[0]),
+			int(ct.TyresInnerTemperature[1]),
+			int(ct.TyresInnerTemperature[2]),
+			int(ct.TyresInnerTemperature[3]),
 		},
 	}
 }

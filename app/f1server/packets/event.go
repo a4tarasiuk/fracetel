@@ -17,14 +17,11 @@ const (
 )
 
 type Event struct {
-	Code1 uint8
-	Code2 uint8
-	Code3 uint8
-	Code4 uint8
+	Code [4]uint8
 }
 
 func (e Event) CodeToString() EventDataCode {
-	return EventDataCode(string(e.Code1) + string(e.Code2) + string(e.Code3) + string(e.Code4))
+	return EventDataCode(string(e.Code[0]) + string(e.Code[1]) + string(e.Code[2]) + string(e.Code[3]))
 }
 
 func (e Event) IsSessionStarted() bool {
