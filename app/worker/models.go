@@ -3,7 +3,7 @@ package worker
 import (
 	"time"
 
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
 )
 
 type CarTelemetry struct {
@@ -26,7 +26,7 @@ type CarTelemetry struct {
 	TyreInnerTemperature []int `bson:"tyre_inner_temperature"`
 }
 
-func carTelemetryFromMessage(telemetry messages.CarTelemetry, header messages.Header) CarTelemetry {
+func carTelemetryFromMessage(telemetry telemetry.CarTelemetry, header telemetry.Header) CarTelemetry {
 	carTelemetry := CarTelemetry{
 		SessionID:              header.SessionID,
 		FrameIdentifier:        header.FrameIdentifier,
@@ -66,7 +66,7 @@ type LapData struct {
 	DriverStatus int `bson:"driver_status"`
 }
 
-func lapDataFromMessage(lapDataMessage messages.LapData, header messages.Header) LapData {
+func lapDataFromMessage(lapDataMessage telemetry.LapData, header telemetry.Header) LapData {
 	return LapData{
 		SessionID:          header.SessionID,
 		FrameIdentifier:    header.FrameIdentifier,
@@ -104,7 +104,7 @@ type Session struct {
 	Duration int `bson:"duration"`
 }
 
-func sessionFromMessage(sessionMessage messages.Session, header messages.Header) Session {
+func sessionFromMessage(sessionMessage telemetry.Session, header telemetry.Header) Session {
 	return Session{
 		SessionID:        header.SessionID,
 		FrameIdentifier:  header.FrameIdentifier,
@@ -162,7 +162,7 @@ type CarStatus struct {
 	ERSDeployedThisLap      float32 `bson:"ers_deployed_this_lap"`
 }
 
-func carStatusFromMessage(carStatusMessage messages.CarStatus, header messages.Header) CarStatus {
+func carStatusFromMessage(carStatusMessage telemetry.CarStatus, header telemetry.Header) CarStatus {
 	return CarStatus{
 		SessionID:               header.SessionID,
 		FrameIdentifier:         header.FrameIdentifier,
@@ -204,7 +204,7 @@ type CarDamage struct {
 	Brakes []int `bson:"brakes"`
 }
 
-func carDamageFromMessage(carDamageMessage messages.CarDamage, header messages.Header) CarDamage {
+func carDamageFromMessage(carDamageMessage telemetry.CarDamage, header telemetry.Header) CarDamage {
 	return CarDamage{
 		SessionID:       header.SessionID,
 		FrameIdentifier: header.FrameIdentifier,
@@ -239,7 +239,7 @@ type LapHistory struct {
 	Sector3Ms int `bson:"sector_3_ms"`
 }
 
-func sessionHistoryFromMessage(sessionHistoryMessage messages.SessionHistory, header messages.Header) SessionHistory {
+func sessionHistoryFromMessage(sessionHistoryMessage telemetry.SessionHistory, header telemetry.Header) SessionHistory {
 	lapsHistory := make([]LapHistory, len(sessionHistoryMessage.LapsHistory))
 
 	for idx := 0; idx < len(sessionHistoryMessage.LapsHistory); idx++ {
@@ -279,8 +279,8 @@ type FinalClassification struct {
 }
 
 func finalClassificationFromMessage(
-	finalClassificationMessage messages.FinalClassification,
-	header messages.Header,
+	finalClassificationMessage telemetry.FinalClassification,
+	header telemetry.Header,
 ) FinalClassification {
 	return FinalClassification{
 		SessionID:         header.SessionID,

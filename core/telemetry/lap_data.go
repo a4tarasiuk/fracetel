@@ -1,4 +1,4 @@
-package messages
+package telemetry
 
 type LapData struct {
 	LastLapTimeMs    int

@@ -1,49 +1,34 @@
 package worker
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 
-	"fracetel/core/messages"
-	"fracetel/core/streams"
-	"github.com/nats-io/nats.go/jetstream"
+	"fracetel/core/telemetry"
+	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-func registerCarTelemetryConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
-	carTelemetryConsumer, err := js.CreateConsumer(
-		ctx,
-		streams.FRaceTelStreamName,
-		jetstream.ConsumerConfig{
-			Durable:       "car_telemetry_consumer",
-			AckPolicy:     jetstream.AckExplicitPolicy,
-			FilterSubject: streams.CarTelemetrySubjectName,
-		},
-	)
-	if err != nil {
-		log.Fatalf("failed to create carTelemetryConsumer: %s", err)
-	}
+func registerCarTelemetryConsumer(natsConn *nats.Conn, collection *mongo.Collection) {
+	_, err := natsConn.Subscribe(
+		telemetry.CarTelemetryTopicName, func(natsMsg *nats.Msg) {
+			natsMsg.Ack()
 
-	_, err = carTelemetryConsumer.Consume(
-		func(jsMsg jetstream.Msg) {
-			jsMsg.Ack()
+			carTelemetryMessage := telemetry.CarTelemetry{}
 
-			carTelemetryMessage := messages.CarTelemetry{}
-
-			message := messages.Message{
-				Header:  messages.Header{},
+			message := telemetry.Message{
+				Header:  telemetry.Header{},
 				Payload: &carTelemetryMessage,
 			}
 
-			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+			if err := json.Unmarshal(natsMsg.Data, &message); err != nil {
 				log.Printf("failed to unmarshal message: %s", err)
 				return
 			}
 
 			carTelemetry := carTelemetryFromMessage(carTelemetryMessage, message.Header)
 
-			log.Printf("received msg with [%s] subject: %+v", streams.CarTelemetrySubjectName, carTelemetry)
+			log.Printf("received msg with [%s] subject: %+v", telemetry.CarTelemetryTopicName, carTelemetry)
 
 			insertToCollection(carTelemetry, collection)
 		},
@@ -53,39 +38,26 @@ func registerCarTelemetryConsumer(js jetstream.JetStream, ctx context.Context, c
 	}
 }
 
-func registerLapDataConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
-	lapDataConsumer, err := js.CreateConsumer(
-		ctx,
-		streams.FRaceTelStreamName,
-		jetstream.ConsumerConfig{
-			Durable:       "lap_data_consumer",
-			AckPolicy:     jetstream.AckExplicitPolicy,
-			FilterSubject: streams.LapDataSubjectName,
-		},
-	)
-	if err != nil {
-		log.Fatalf("failed to create lapDataConsumer: %s", err)
-	}
+func registerLapDataConsumer(natsConn *nats.Conn, collection *mongo.Collection) {
+	_, err := natsConn.Subscribe(
+		telemetry.LapDataTopicName, func(natsMsg *nats.Msg) {
+			natsMsg.Ack()
 
-	_, err = lapDataConsumer.Consume(
-		func(jsMsg jetstream.Msg) {
-			jsMsg.Ack()
+			lapDataMessage := telemetry.LapData{}
 
-			lapDataMessage := messages.LapData{}
-
-			message := messages.Message{
-				Header:  messages.Header{},
+			message := telemetry.Message{
+				Header:  telemetry.Header{},
 				Payload: &lapDataMessage,
 			}
 
-			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+			if err := json.Unmarshal(natsMsg.Data, &message); err != nil {
 				log.Printf("failed to unmarshal message: %s", err)
 				return
 			}
 
 			lapData := lapDataFromMessage(lapDataMessage, message.Header)
 
-			log.Printf("received msg with [%s] subject: %+v", streams.LapDataSubjectName, lapData)
+			log.Printf("received msg with [%s] subject: %+v", telemetry.LapDataTopicName, lapData)
 
 			insertToCollection(lapData, collection)
 		},
@@ -95,39 +67,26 @@ func registerLapDataConsumer(js jetstream.JetStream, ctx context.Context, collec
 	}
 }
 
-func registerSessionConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
-	sessionConsumer, err := js.CreateConsumer(
-		ctx,
-		streams.FRaceTelStreamName,
-		jetstream.ConsumerConfig{
-			Durable:       "session_consumer",
-			AckPolicy:     jetstream.AckExplicitPolicy,
-			FilterSubject: streams.SessionSubjectName,
-		},
-	)
-	if err != nil {
-		log.Fatalf("failed to create sessionConsumer: %s", err)
-	}
+func registerSessionConsumer(natsConn *nats.Conn, collection *mongo.Collection) {
+	_, err := natsConn.Subscribe(
+		telemetry.SessionTopicName, func(natsMsg *nats.Msg) {
+			natsMsg.Ack()
 
-	_, err = sessionConsumer.Consume(
-		func(jsMsg jetstream.Msg) {
-			jsMsg.Ack()
+			sessionMessage := telemetry.Session{}
 
-			sessionMessage := messages.Session{}
-
-			message := messages.Message{
-				Header:  messages.Header{},
+			message := telemetry.Message{
+				Header:  telemetry.Header{},
 				Payload: &sessionMessage,
 			}
 
-			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+			if err := json.Unmarshal(natsMsg.Data, &message); err != nil {
 				log.Printf("failed to unmarshal message: %s", err)
 				return
 			}
 
 			session := sessionFromMessage(sessionMessage, message.Header)
 
-			log.Printf("received msg with [%s] subject: %+v", streams.SessionSubjectName, session)
+			log.Printf("received msg with [%s] subject: %+v", telemetry.SessionTopicName, session)
 
 			insertToCollection(session, collection)
 		},
@@ -137,39 +96,26 @@ func registerSessionConsumer(js jetstream.JetStream, ctx context.Context, collec
 	}
 }
 
-func registerCarStatusConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
-	carStatusConsumer, err := js.CreateConsumer(
-		ctx,
-		streams.FRaceTelStreamName,
-		jetstream.ConsumerConfig{
-			Durable:       "car_status_consumer",
-			AckPolicy:     jetstream.AckExplicitPolicy,
-			FilterSubject: streams.CarStatusSubjectName,
-		},
-	)
-	if err != nil {
-		log.Fatalf("failed to create carStatusConsumer: %s", err)
-	}
+func registerCarStatusConsumer(natsConn *nats.Conn, collection *mongo.Collection) {
+	_, err := natsConn.Subscribe(
+		telemetry.CarStatusTopicName, func(natsMsg *nats.Msg) {
+			natsMsg.Ack()
 
-	_, err = carStatusConsumer.Consume(
-		func(jsMsg jetstream.Msg) {
-			jsMsg.Ack()
+			carStatusMessage := telemetry.CarStatus{}
 
-			carStatusMessage := messages.CarStatus{}
-
-			message := messages.Message{
-				Header:  messages.Header{},
+			message := telemetry.Message{
+				Header:  telemetry.Header{},
 				Payload: &carStatusMessage,
 			}
 
-			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+			if err := json.Unmarshal(natsMsg.Data, &message); err != nil {
 				log.Printf("failed to unmarshal message: %s", err)
 				return
 			}
 
 			carStatus := carStatusFromMessage(carStatusMessage, message.Header)
 
-			log.Printf("received msg with [%s] subject: %+v", streams.CarStatusSubjectName, carStatus)
+			log.Printf("received msg with [%s] subject: %+v", telemetry.CarStatusTopicName, carStatus)
 
 			insertToCollection(carStatus, collection)
 		},
@@ -179,39 +125,26 @@ func registerCarStatusConsumer(js jetstream.JetStream, ctx context.Context, coll
 	}
 }
 
-func registerCarDamageConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
-	carDamageConsumer, err := js.CreateConsumer(
-		ctx,
-		streams.FRaceTelStreamName,
-		jetstream.ConsumerConfig{
-			Durable:       "car_damage_consumer",
-			AckPolicy:     jetstream.AckExplicitPolicy,
-			FilterSubject: streams.CarDamageSubjectName,
-		},
-	)
-	if err != nil {
-		log.Fatalf("failed to create carDamageConsumer: %s", err)
-	}
+func registerCarDamageConsumer(natsConn *nats.Conn, collection *mongo.Collection) {
+	_, err := natsConn.Subscribe(
+		telemetry.CarDamageTopicName, func(natsMsg *nats.Msg) {
+			natsMsg.Ack()
 
-	_, err = carDamageConsumer.Consume(
-		func(jsMsg jetstream.Msg) {
-			jsMsg.Ack()
+			carDamageMessage := telemetry.CarDamage{}
 
-			carDamageMessage := messages.CarDamage{}
-
-			message := messages.Message{
-				Header:  messages.Header{},
+			message := telemetry.Message{
+				Header:  telemetry.Header{},
 				Payload: &carDamageMessage,
 			}
 
-			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+			if err := json.Unmarshal(natsMsg.Data, &message); err != nil {
 				log.Printf("failed to unmarshal message: %s", err)
 				return
 			}
 
 			carDamage := carDamageFromMessage(carDamageMessage, message.Header)
 
-			log.Printf("received msg with [%s] subject: %+v", streams.CarDamageSubjectName, carDamage)
+			log.Printf("received msg with [%s] subject: %+v", telemetry.CarDamageTopicName, carDamage)
 
 			insertToCollection(carDamage, collection)
 		},
@@ -221,39 +154,26 @@ func registerCarDamageConsumer(js jetstream.JetStream, ctx context.Context, coll
 	}
 }
 
-func registerSessionHistoryConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
-	sessionHistoryConsumer, err := js.CreateConsumer(
-		ctx,
-		streams.FRaceTelStreamName,
-		jetstream.ConsumerConfig{
-			Durable:       "session_history_consumer",
-			AckPolicy:     jetstream.AckExplicitPolicy,
-			FilterSubject: streams.SessionHistorySubjectName,
-		},
-	)
-	if err != nil {
-		log.Fatalf("failed to create sessionHistoryConsumer: %s", err)
-	}
+func registerSessionHistoryConsumer(natsConn *nats.Conn, collection *mongo.Collection) {
+	_, err := natsConn.Subscribe(
+		telemetry.SessionHistoryTopicName, func(natsMsg *nats.Msg) {
+			natsMsg.Ack()
 
-	_, err = sessionHistoryConsumer.Consume(
-		func(jsMsg jetstream.Msg) {
-			jsMsg.Ack()
+			sessionHistoryMessage := telemetry.SessionHistory{}
 
-			sessionHistoryMessage := messages.SessionHistory{}
-
-			message := messages.Message{
-				Header:  messages.Header{},
+			message := telemetry.Message{
+				Header:  telemetry.Header{},
 				Payload: &sessionHistoryMessage,
 			}
 
-			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+			if err := json.Unmarshal(natsMsg.Data, &message); err != nil {
 				log.Printf("failed to unmarshal message: %s", err)
 				return
 			}
 
 			sessionHistory := sessionHistoryFromMessage(sessionHistoryMessage, message.Header)
 
-			log.Printf("received msg with [%s] subject: %+v", streams.SessionHistorySubjectName, sessionHistory)
+			log.Printf("received msg with [%s] subject: %+v", telemetry.SessionHistoryTopicName, sessionHistory)
 
 			insertToCollection(sessionHistory, collection)
 		},
@@ -263,32 +183,19 @@ func registerSessionHistoryConsumer(js jetstream.JetStream, ctx context.Context,
 	}
 }
 
-func registerFinalClassificationConsumer(js jetstream.JetStream, ctx context.Context, collection *mongo.Collection) {
-	finalClassificationConsumer, err := js.CreateConsumer(
-		ctx,
-		streams.FRaceTelStreamName,
-		jetstream.ConsumerConfig{
-			Durable:       "final_classification_consumer",
-			AckPolicy:     jetstream.AckExplicitPolicy,
-			FilterSubject: streams.FinalClassificationSubjectName,
-		},
-	)
-	if err != nil {
-		log.Fatalf("failed to create finalClassificationConsumer: %s", err)
-	}
+func registerFinalClassificationConsumer(natsConn *nats.Conn, collection *mongo.Collection) {
+	_, err := natsConn.Subscribe(
+		telemetry.FinalClassificationTopicName, func(natsMsg *nats.Msg) {
+			natsMsg.Ack()
 
-	_, err = finalClassificationConsumer.Consume(
-		func(jsMsg jetstream.Msg) {
-			jsMsg.Ack()
+			finalClassificationMessage := telemetry.FinalClassification{}
 
-			finalClassificationMessage := messages.FinalClassification{}
-
-			message := messages.Message{
-				Header:  messages.Header{},
+			message := telemetry.Message{
+				Header:  telemetry.Header{},
 				Payload: &finalClassificationMessage,
 			}
 
-			if err = json.Unmarshal(jsMsg.Data(), &message); err != nil {
+			if err := json.Unmarshal(natsMsg.Data, &message); err != nil {
 				log.Printf("failed to unmarshal message: %s", err)
 				return
 			}
@@ -297,7 +204,7 @@ func registerFinalClassificationConsumer(js jetstream.JetStream, ctx context.Con
 
 			log.Printf(
 				"received msg with [%s] subject: %+v",
-				streams.FinalClassificationSubjectName,
+				telemetry.FinalClassificationTopicName,
 				finalClassification,
 			)
 

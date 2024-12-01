@@ -6,7 +6,7 @@ import (
 	"errors"
 	"log"
 
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
 )
 
 type sessionHistory struct {
@@ -27,13 +27,13 @@ type sessionHistory struct {
 	TyreStintHistoryData [8]tyreStintHistoryData
 }
 
-func (sh sessionHistory) ToMessagePayload() messages.SessionHistory {
-	lapsHistory := make([]messages.LapHistory, len(sh.LapHistoryData))
+func (sh sessionHistory) ToTelemetryMessagePayload() telemetry.SessionHistory {
+	lapsHistory := make([]telemetry.LapHistory, len(sh.LapHistoryData))
 
 	for idx := 0; idx < len(sh.LapHistoryData); idx++ {
 		lapHistoryPacket := sh.LapHistoryData[idx]
 
-		lapsHistory[idx] = messages.LapHistory{
+		lapsHistory[idx] = telemetry.LapHistory{
 			LapTimeMs: int(lapHistoryPacket.LapTimeMs),
 			Sector1Ms: int(lapHistoryPacket.Sector1Ms),
 			Sector2Ms: int(lapHistoryPacket.Sector2Ms),
@@ -41,7 +41,7 @@ func (sh sessionHistory) ToMessagePayload() messages.SessionHistory {
 		}
 	}
 
-	return messages.SessionHistory{
+	return telemetry.SessionHistory{
 		NumLaps:           int(sh.NumLaps),
 		BestLapTimeLapNum: int(sh.BestLapTimeLapNum),
 		BestSector1LapNum: int(sh.BestSector1LapNum),
@@ -70,7 +70,10 @@ type tyreStintHistoryData struct {
 
 type sessionHistoryParser struct{}
 
-func (p sessionHistoryParser) ToMessage(header *Header, rawPacket RawPacket) (*messages.Message, error) {
+func (p sessionHistoryParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+	*telemetry.Message,
+	error,
+) {
 
 	sessionHistoryPacket := sessionHistory{}
 
@@ -84,15 +87,14 @@ func (p sessionHistoryParser) ToMessage(header *Header, rawPacket RawPacket) (*m
 
 	// Session history is sent for every car. All other cars should be ignored. Only players data must be processed
 	if sessionHistoryPacket.CarIdx != header.PlayerCarIdx {
-		return &messages.Message{}, errors.New("skipped as it does not relate to current player")
+		return &telemetry.Message{}, errors.New("skipped as it does not relate to current player")
 	}
 
-	payload := sessionHistoryPacket.ToMessagePayload()
+	payload := sessionHistoryPacket.ToTelemetryMessagePayload()
 
-	msg := messages.New(
-		messages.SessionHistoryMessageType,
+	msg := telemetry.NewMessage(
+		telemetry.SessionHistoryMessageType,
 		header.SessionUID,
-		header.PacketID,
 		header.FrameIdentifier,
 		&payload,
 	)

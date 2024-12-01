@@ -6,7 +6,7 @@ import (
 	"errors"
 	"log"
 
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
 )
 
 type EventDataCode string
@@ -34,8 +34,8 @@ func (e Event) IsSessionFinished() bool {
 
 type eventPacketParser struct{}
 
-func (p eventPacketParser) ToMessage(header *Header, rawPacket RawPacket) (
-	*messages.Message,
+func (p eventPacketParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+	*telemetry.Message,
 	error,
 ) {
 	event := Event{}
@@ -53,8 +53,8 @@ func (p eventPacketParser) ToMessage(header *Header, rawPacket RawPacket) (
 	// if event.IsSessionStarted() {
 	// 	log.Printf("=== SESSION STARTED ===, %s", strconv.FormatUint(header.SessionUID, 10))
 	//
-	// 	return &messages.Message{
-	// 		Type:       messages.SessionStartedMessageType,
+	// 	return &telemetry.Message{
+	// 		Type:       telemetry.SessionStartedMessageType,
 	// 		SessionID:  header.SessionUID,
 	// 		Payload:    nil,
 	// 		OccurredAt: time.Now().UTC(),
@@ -63,13 +63,13 @@ func (p eventPacketParser) ToMessage(header *Header, rawPacket RawPacket) (
 	// } else if event.IsSessionFinished() {
 	// 	log.Printf("=== SESSION FINISHED ===, %s", strconv.FormatUint(header.SessionUID, 10))
 	//
-	// 	return &messages.Message{
-	// 		Type:       messages.SessionFinishedMessageType,
+	// 	return &telemetry.Message{
+	// 		Type:       telemetry.SessionFinishedMessageType,
 	// 		SessionID:  header.SessionUID,
 	// 		Payload:    nil,
 	// 		OccurredAt: time.Now().UTC(),
 	// 	}, nil
 	// }
 
-	return &messages.Message{}, errors.New("unsupported event")
+	return &telemetry.Message{}, errors.New("unsupported event")
 }

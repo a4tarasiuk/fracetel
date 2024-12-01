@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
 )
 
 type carStatus struct {
@@ -47,8 +47,8 @@ type carStatus struct {
 	NetworkPaused uint8
 }
 
-func (cs carStatus) ToMessagePayload() messages.CarStatus {
-	return messages.CarStatus{
+func (cs carStatus) ToTelemetryMessagePayload() telemetry.CarStatus {
+	return telemetry.CarStatus{
 		TractionControl:         int(cs.TractionControl),
 		AntiLockBrakes:          int(cs.AntiLockBrakes),
 		FuelMix:                 int(cs.FuelMix),
@@ -76,8 +76,8 @@ func (cs carStatus) ToMessagePayload() messages.CarStatus {
 
 type carStatusParser struct{}
 
-func (p carStatusParser) ToMessage(header *Header, rawPacket RawPacket) (
-	*messages.Message,
+func (p carStatusParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+	*telemetry.Message,
 	error,
 ) {
 	carStatusPackets := make([]carStatus, F1TotalCars)
@@ -90,12 +90,11 @@ func (p carStatusParser) ToMessage(header *Header, rawPacket RawPacket) (
 		log.Printf("Error during reading CarStatus: %s", err)
 	}
 
-	carStatusPayload := carStatusPackets[header.PlayerCarIdx].ToMessagePayload()
+	carStatusPayload := carStatusPackets[header.PlayerCarIdx].ToTelemetryMessagePayload()
 
-	msg := messages.New(
-		messages.CarStatusMessageType,
+	msg := telemetry.NewMessage(
+		telemetry.CarStatusMessageType,
 		header.SessionUID,
-		header.PacketID,
 		header.FrameIdentifier,
 		&carStatusPayload,
 	)

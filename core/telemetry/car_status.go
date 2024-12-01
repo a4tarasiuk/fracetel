@@ -1,4 +1,4 @@
-package messages
+package telemetry
 
 type CarStatus struct {
 	TractionControl int

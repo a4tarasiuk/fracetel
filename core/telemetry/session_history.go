@@ -1,4 +1,4 @@
-package messages
+package telemetry
 
 type SessionHistory struct {
 	NumLaps int

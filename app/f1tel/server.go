@@ -5,7 +5,8 @@ import (
 	"net"
 
 	"fracetel/app/f1tel/packets"
-	"fracetel/core/messages"
+	"fracetel/core/telemetry"
+	"fracetel/internal/messaging"
 )
 
 const BufferSizeBytes = 2048
@@ -14,18 +15,18 @@ type telemetryServer struct {
 	addr net.IP
 	port int
 
-	messageStream MessagePublisher
+	eventStream messaging.EventStream
 }
 
 func NewTelemetryServer(
 	addr net.IP,
 	port int,
-	messageStream MessagePublisher,
+	eventStream messaging.EventStream,
 ) *telemetryServer {
 	return &telemetryServer{
-		addr:          addr,
-		port:          port,
-		messageStream: messageStream,
+		addr:        addr,
+		port:        port,
+		eventStream: eventStream,
 	}
 }
 
@@ -45,9 +46,9 @@ func (s *telemetryServer) StartAndListen() {
 
 	log.Printf("Listening on %d", s.port)
 
-	messageChan := make(chan *messages.Message)
+	telMessageChan := make(chan *telemetry.Message)
 
-	go MessageProcessor(s.messageStream, messageChan)
+	go TelemetryMessageProcessor(s.eventStream, telMessageChan)
 
 	for {
 		buffer := make([]byte, BufferSizeBytes)
@@ -73,11 +74,11 @@ func (s *telemetryServer) StartAndListen() {
 			continue
 		}
 
-		message, err := parser.ToMessage(header, rawPacket)
+		telMessage, err := parser.ToTelemetryMessage(header, rawPacket)
 		if err != nil {
 			continue
 		}
 
-		messageChan <- message
+		telMessageChan <- telMessage
 	}
 }
