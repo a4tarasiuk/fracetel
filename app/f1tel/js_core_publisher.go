@@ -1,4 +1,4 @@
-package f1server
+package f1tel
 
 import (
 	"encoding/json"

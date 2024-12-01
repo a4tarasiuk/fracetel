@@ -82,7 +82,7 @@ func (p sessionHistoryParser) ToMessage(header *Header, rawPacket RawPacket) (*m
 		log.Printf("Error during reading Session: %s", err)
 	}
 
-	// TODO: Describe corner case
+	// Session history is sent for every car. All other cars should be ignored. Only players data must be processed
 	if sessionHistoryPacket.CarIdx != header.PlayerCarIdx {
 		return &messages.Message{}, errors.New("skipped as it does not relate to current player")
 	}
