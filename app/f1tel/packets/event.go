@@ -9,6 +9,29 @@ import (
 	"fracetel/core/messages"
 )
 
+type EventDataCode string
+
+const (
+	sessionStartedCode  EventDataCode = "SSTA"
+	sessionFinishedCode               = "SEND"
+)
+
+type Event struct {
+	Code [4]uint8
+}
+
+func (e Event) CodeToString() EventDataCode {
+	return EventDataCode(string(e.Code[0]) + string(e.Code[1]) + string(e.Code[2]) + string(e.Code[3]))
+}
+
+func (e Event) IsSessionStarted() bool {
+	return e.CodeToString() == sessionStartedCode
+}
+
+func (e Event) IsSessionFinished() bool {
+	return e.CodeToString() == sessionFinishedCode
+}
+
 type eventPacketParser struct{}
 
 func (p eventPacketParser) ToMessage(header *Header, rawPacket RawPacket) (

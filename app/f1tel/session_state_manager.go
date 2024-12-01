@@ -1,4 +1,4 @@
-package f1server
+package f1tel
 
 const defaultSessionID = uint64(0)
 

@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	"fracetel/app/f1server"
+	"fracetel/app/f1tel"
 	"fracetel/app/worker"
 	"fracetel/internal/infra"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -33,11 +33,11 @@ func main() {
 		}
 	}()
 
-	messageStream := f1server.NewJetStreamMessagePublisher(js)
+	messageStream := f1tel.NewJetStreamMessagePublisher(js)
 
-	f1UDPServer := f1server.NewF1UDPServer(net.IPv4(0, 0, 0, 0), 20777, messageStream)
+	f1TelemetryServer := f1tel.NewTelemetryServer(net.IPv4(0, 0, 0, 0), 20777, messageStream)
 
-	go f1UDPServer.Start()
+	go f1TelemetryServer.StartAndListen()
 
 	go worker.ConsumeEvents(js, mongoClient)
 

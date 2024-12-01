@@ -1,34 +1,35 @@
-package f1server
+package f1tel
 
 import (
 	"log"
 	"net"
 
-	"fracetel/app/f1server/packets"
+	"fracetel/app/f1tel/packets"
 	"fracetel/core/messages"
-	"fracetel/core/streams"
 )
 
-type f1UDPServer struct {
+const BufferSizeBytes = 2048
+
+type telemetryServer struct {
 	addr net.IP
 	port int
 
 	messageStream MessagePublisher
 }
 
-func NewF1UDPServer(
+func NewTelemetryServer(
 	addr net.IP,
 	port int,
 	messageStream MessagePublisher,
-) *f1UDPServer {
-	return &f1UDPServer{
+) *telemetryServer {
+	return &telemetryServer{
 		addr:          addr,
 		port:          port,
 		messageStream: messageStream,
 	}
 }
 
-func (s *f1UDPServer) Start() {
+func (s *telemetryServer) StartAndListen() {
 	addr := net.UDPAddr{
 		IP:   s.addr,
 		Port: s.port,
@@ -49,7 +50,7 @@ func (s *f1UDPServer) Start() {
 	go MessageProcessor(s.messageStream, messageChan)
 
 	for {
-		buffer := make([]byte, 2048)
+		buffer := make([]byte, BufferSizeBytes)
 
 		nRead, _, err := conn.ReadFrom(buffer)
 
@@ -78,20 +79,5 @@ func (s *f1UDPServer) Start() {
 		}
 
 		messageChan <- message
-	}
-}
-
-func MessageProcessor(messageStream MessagePublisher, messageChan <-chan *messages.Message) {
-	for message := range messageChan {
-
-		subjectName, ok := streams.MessageTypeSubjectMap[message.Type]
-
-		if !ok {
-			continue
-		}
-
-		if err := messageStream.Publish(message, subjectName); err != nil {
-			log.Printf("failed to publish message. type: %s| packed_id: %s", message.Type, message.Header.PacketID)
-		}
 	}
 }

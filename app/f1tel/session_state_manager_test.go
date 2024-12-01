@@ -1,4 +1,4 @@
-package f1server
+package f1tel
 
 import (
 	"testing"
@@ -49,9 +49,9 @@ func Test_sessionManager_WhenNewSessionCreated(t *testing.T) {
 	msg := publishedMessages[0]
 
 	assert.Equal(t, messages.SessionStartedMessageType, msg.Type, "Invalid message type")
-	assert.Equal(t, nextSessionID, msg.SessionID)
+	assert.Equal(t, nextSessionID, msg.Header.SessionID)
 	assert.Equal(t, &messages.EmptyPayload, msg.Payload, "This message must be without payload")
-	assert.False(t, msg.OccurredAt.IsZero(), "DateTime must be set")
+	assert.False(t, msg.Header.OccurredAt.IsZero(), "DateTime must be set")
 }
 
 func Test_sessionManager_FinishSession(t *testing.T) {
@@ -73,7 +73,7 @@ func Test_sessionManager_FinishSession(t *testing.T) {
 	msg := publishedMessages[0]
 
 	assert.Equal(t, messages.SessionFinishedMessageType, msg.Type, "Invalid message type")
-	assert.Equal(t, sessionID, msg.SessionID)
+	assert.Equal(t, sessionID, msg.Header.SessionID)
 	assert.Equal(t, &messages.EmptyPayload, msg.Payload, "This message must be without payload")
-	assert.False(t, msg.OccurredAt.IsZero(), "DateTime must be set")
+	assert.False(t, msg.Header.OccurredAt.IsZero(), "DateTime must be set")
 }
