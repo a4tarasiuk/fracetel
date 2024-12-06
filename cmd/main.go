@@ -21,25 +21,27 @@ func main() {
 	//  3. Allow to start-up the sub-applications via module interface
 	//  The main goal is to encapsulate infra staff and module logic with componenets
 
+	cfg := infra.LoadConfigFromEnv()
+
 	foreverCh := make(chan int)
 
-	mongoClient, _ := mongo.Connect(options.Client().ApplyURI("mongodb://root:example@localhost:27017"))
+	mongoClient, _ := mongo.Connect(options.Client().ApplyURI(cfg.DBUrl))
 	defer func() {
 		if err := mongoClient.Disconnect(context.TODO()); err != nil {
 			panic(err)
 		}
 	}()
 
-	mongoDB := mongoClient.Database("fracetel")
+	mongoDB := mongoClient.Database(cfg.DBName)
 
-	natsConn, err := nats.Connect(nats.DefaultURL)
+	natsConn, err := nats.Connect(cfg.NatsURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to NATS %s", err)
 	}
 
 	natsEventStream := infra.NewNatsEventStream(natsConn)
 
-	f1TelemetryServer := f1tel.NewTelemetryServer(net.IPv4(0, 0, 0, 0), 20777, natsEventStream)
+	f1TelemetryServer := f1tel.NewTelemetryServer(net.IPv4(0, 0, 0, 0), cfg.F1TelServerPort, natsEventStream)
 
 	go f1TelemetryServer.StartAndListen()
 

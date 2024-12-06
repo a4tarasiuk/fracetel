@@ -193,3 +193,5 @@ docker-compose.yml
 .docker-volumes
 
 todo
+
+.env
