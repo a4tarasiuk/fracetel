@@ -36,3 +36,6 @@ Used technologies:
 * Golang
 * NATS
 * MongoDB
+* OpenTelemetry
+* Prometheus
+* Grafana

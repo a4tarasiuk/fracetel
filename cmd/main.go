@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 
 	"fracetel/app/f1tel"
 	"fracetel/app/web"
@@ -19,11 +22,30 @@ func main() {
 	//  1. Create module interface that accepts all the infra staff (natsConn, mongo.Database)
 	//  2. Add implementation that creates needed interface implementations with provided infra objects
 	//  3. Allow to start-up the sub-applications via module interface
-	//  The main goal is to encapsulate infra staff and module logic with componenets
+	//  The main goal is to encapsulate infra staff and module logic with components
+
+	// TODO: Add graceful shutdown
+
+	// 	ctx, cancel := context.WithCancel(context.Background())
+	//	ch := make(chan os.Signal, 1)
+	//	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+	// 	<-ch
+	//	cancel()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	// Set up OpenTelemetry.
+	oTelShutdown, err := infra.SetupOTelSDK(ctx)
+	if err != nil {
+		return
+	}
+	// Handle shutdown properly so nothing leaks.
+	defer func() {
+		err = errors.Join(err, oTelShutdown(context.Background()))
+	}()
 
 	cfg := infra.LoadConfigFromEnv()
-
-	foreverCh := make(chan int)
 
 	mongoClient, _ := mongo.Connect(options.Client().ApplyURI(cfg.DBUrl))
 	defer func() {
@@ -49,5 +71,10 @@ func main() {
 
 	go web.StartWsServerAndListen(natsConn)
 
-	<-foreverCh
+	select {
+	case <-ctx.Done():
+		stop()
+	}
+
+	// TODO: Shutdown apps
 }

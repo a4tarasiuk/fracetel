@@ -1,17 +1,26 @@
 package worker
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 
 	"fracetel/core/telemetry"
 	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 func registerCarTelemetryConsumer(natsConn *nats.Conn, collection *mongo.Collection) {
+	traceProvider := otel.GetTracerProvider()
+	tracer := traceProvider.Tracer("car-telemetry-consumer")
+
 	_, err := natsConn.Subscribe(
 		telemetry.CarTelemetryTopicName, func(natsMsg *nats.Msg) {
+			_, span := tracer.Start(context.TODO(), "car-telemetry-span")
+			defer span.End()
+
 			natsMsg.Ack()
 
 			carTelemetryMessage := telemetry.CarTelemetry{}
@@ -31,6 +40,11 @@ func registerCarTelemetryConsumer(natsConn *nats.Conn, collection *mongo.Collect
 			log.Printf("received msg with [%s] subject: %+v", telemetry.CarTelemetryTopicName, carTelemetry)
 
 			insertToCollection(carTelemetry, collection)
+
+			span.SetAttributes(
+				attribute.String("sessionID", carTelemetry.SessionID),
+				attribute.String("frameIdentifier", carTelemetry.FrameIdentifier),
+			)
 		},
 	)
 	if err != nil {
