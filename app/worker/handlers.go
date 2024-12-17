@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 
+	"fracetel/app/sessions"
 	"fracetel/core/telemetry"
 	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -82,6 +83,12 @@ func registerLapDataConsumer(natsConn *nats.Conn, collection *mongo.Collection) 
 }
 
 func registerSessionConsumer(natsConn *nats.Conn, collection *mongo.Collection) {
+	userSessionService := sessions.NewUserSessionService(collection.Database().Collection("user_sessions"))
+
+	sessionChan := make(chan Session)
+
+	go processSessionMessage(sessionChan, userSessionService)
+
 	_, err := natsConn.Subscribe(
 		telemetry.SessionTopicName, func(natsMsg *nats.Msg) {
 			natsMsg.Ack()
@@ -103,6 +110,8 @@ func registerSessionConsumer(natsConn *nats.Conn, collection *mongo.Collection) 
 			log.Printf("received msg with [%s] subject: %+v", telemetry.SessionTopicName, session)
 
 			insertToCollection(session, collection)
+
+			sessionChan <- session
 		},
 	)
 	if err != nil {
@@ -198,6 +207,12 @@ func registerSessionHistoryConsumer(natsConn *nats.Conn, collection *mongo.Colle
 }
 
 func registerFinalClassificationConsumer(natsConn *nats.Conn, collection *mongo.Collection) {
+	userSessionService := sessions.NewUserSessionService(collection.Database().Collection("user_sessions"))
+
+	finalClassificationChan := make(chan FinalClassification)
+
+	go processFinalClassificationMessage(finalClassificationChan, userSessionService)
+
 	_, err := natsConn.Subscribe(
 		telemetry.FinalClassificationTopicName, func(natsMsg *nats.Msg) {
 			natsMsg.Ack()
@@ -223,6 +238,8 @@ func registerFinalClassificationConsumer(natsConn *nats.Conn, collection *mongo.
 			)
 
 			insertToCollection(finalClassification, collection)
+
+			finalClassificationChan <- finalClassification
 		},
 	)
 	if err != nil {
