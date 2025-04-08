@@ -8,9 +8,9 @@ import (
 	"os"
 	"os/signal"
 
-	"fracetel/app/f1tel"
-	"fracetel/app/web"
-	"fracetel/app/worker"
+	"fracetel/internal/app/f1tel"
+	"fracetel/internal/app/legacy/web"
+	"fracetel/internal/app/legacy/worker"
 	"fracetel/internal/infra"
 	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -76,5 +76,5 @@ func main() {
 		stop()
 	}
 
-	// TODO: Shutdown apps
+	// TODO: Shutdown app
 }

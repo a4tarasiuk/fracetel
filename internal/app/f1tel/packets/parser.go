@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"fracetel/core/telemetry"
+	"fracetel/internal/core/telemetry"
 )
 
 const HeaderTotalBytes = 24

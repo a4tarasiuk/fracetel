@@ -4,8 +4,8 @@ import (
 	"log"
 	"net"
 
-	"fracetel/app/f1tel/packets"
-	"fracetel/core/telemetry"
+	"fracetel/internal/app/f1tel/packets"
+	"fracetel/internal/core/telemetry"
 	"fracetel/internal/messaging"
 )
 

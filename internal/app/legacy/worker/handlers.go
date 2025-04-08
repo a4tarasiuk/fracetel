@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"log"
 
-	"fracetel/app/sessions"
-	"fracetel/core/telemetry"
+	"fracetel/internal/app/legacy/app/sessions"
+	telemetry "fracetel/internal/core/telemetry"
 	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.opentelemetry.io/otel"

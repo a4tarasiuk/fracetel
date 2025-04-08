@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"log"
 
-	"fracetel/app/sessions"
+	sessions2 "fracetel/internal/app/legacy/app/sessions"
 	"github.com/google/uuid"
 )
 
 func processSessionMessage(
 	sessionChan <-chan Session,
-	userSessionService sessions.UserSessionService,
+	userSessionService sessions2.UserSessionService,
 ) {
-	sessionStateManager := sessions.NewSessionStateManager()
+	sessionStateManager := sessions2.NewSessionStateManager()
 
 	for session := range sessionChan {
 		if !sessionStateManager.ShouldStartNewSession(session.SessionID) {
 			continue
 		}
 
-		userSession := sessions.UserSession{
+		userSession := sessions2.UserSession{
 			ID:         uuid.New().String(),
 			ExternalID: session.SessionID,
 			StartedAt:  session.OccurredAt,
@@ -39,7 +39,7 @@ func processSessionMessage(
 
 func processFinalClassificationMessage(
 	finalClassificationChan <-chan FinalClassification,
-	userSessionService sessions.UserSessionService,
+	userSessionService sessions2.UserSessionService,
 ) {
 	for finalClassification := range finalClassificationChan {
 

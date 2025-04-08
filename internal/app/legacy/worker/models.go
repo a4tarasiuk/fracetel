@@ -3,7 +3,7 @@ package worker
 import (
 	"time"
 
-	"fracetel/core/telemetry"
+	"fracetel/internal/core/telemetry"
 )
 
 type CarTelemetry struct {
@@ -239,7 +239,10 @@ type LapHistory struct {
 	Sector3Ms int `bson:"sector_3_ms"`
 }
 
-func sessionHistoryFromMessage(sessionHistoryMessage telemetry.SessionHistory, header telemetry.Header) SessionHistory {
+func sessionHistoryFromMessage(
+	sessionHistoryMessage telemetry.SessionHistory,
+	header telemetry.Header,
+) SessionHistory {
 	lapsHistory := make([]LapHistory, len(sessionHistoryMessage.LapsHistory))
 
 	for idx := 0; idx < len(sessionHistoryMessage.LapsHistory); idx++ {

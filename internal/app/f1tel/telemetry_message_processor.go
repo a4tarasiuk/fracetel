@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"fracetel/core/telemetry"
+	"fracetel/internal/core/telemetry"
 	"fracetel/internal/messaging"
 )
 

@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"fracetel/core/telemetry"
+	"fracetel/internal/core/telemetry"
 )
 
 type finalClassification struct {
