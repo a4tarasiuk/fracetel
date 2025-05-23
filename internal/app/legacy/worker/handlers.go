@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"fracetel/internal/app/legacy/app/sessions"
-	telemetry "fracetel/internal/core/telemetry"
+	"fracetel/pkg/telemetry"
 	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.opentelemetry.io/otel"

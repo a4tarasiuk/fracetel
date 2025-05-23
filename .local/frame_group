@@ -1,0 +1,180 @@
+Note: events are ordered by the order they are received
+
+RACE START
+==============================
+
+# many more events before session started
+[Event]: "Various notable events that happen during session"     | 3 | 0
+[Event]: "Various notable events that happen during session"     | 3 | 0
+[Event]: "Various notable events that happen during session"     | 3 | 0
+
+* Frame #0
+[Session]: "Data about the session - track, time left"           | 1 | 0
+[Participants]: "List of participants in the session"            | 4 | 0
+[CarSetups]: "Packet detailing car setups for cars in the race"  | 5 | 0
+[CarDamage]: "Damage status for all cars"                        | 10 | 0
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 0
+[Motion]: "Contains all motion data for player's car"            | 0 | 0
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 0
+[CarStatus]: "Status data for all cars"                          | 7 | 0
+
+* Frame #1
+[Session]: "Data about the session - track, time left"           | 1 | 1
+[Participants]: "List of participants in the session"            | 4 | 1
+[CarSetups]: "Packet detailing car setups for cars in the race"  | 5 | 1
+[CarDamage]: "Damage status for all cars"                        | 10 | 1
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 1
+[Motion]: "Contains all motion data for player's car"            | 0 | 1
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 1
+[CarStatus]: "Status data for all cars"                          | 7 | 1
+
+* Frame #2
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 2
+[Motion]: "Contains all motion data for player's car"            | 0 | 2
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 2
+[CarStatus]: "Status data for all cars"                          | 7 | 2
+
+* Frame #3
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 3
+[Motion]: "Contains all motion data for player's car"            | 0 | 3
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 3
+[CarStatus]: "Status data for all cars"                          | 7 | 3
+
+* Frame #4
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 4
+[Motion]: "Contains all motion data for player's car"            | 0 | 4
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 4
+[CarStatus]: "Status data for all cars"                          | 7 | 4
+
+* Frame #5
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 5
+[Motion]: "Contains all motion data for player's car"            | 0 | 5
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 5
+[CarStatus]: "Status data for all cars"                          | 7 | 5
+
+* Frame #6
+[Session]: "Data about the session - track, time left"           | 1 | 6
+[CarSetups]: "Packet detailing car setups for cars in the race"  | 5 | 6
+[CarDamage]: "Damage status for all cars"                        | 10 | 6
+
+* Frame #7
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 7
+[Motion]: "Contains all motion data for player's car"            | 0 | 7
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 7
+[CarStatus]: "Status data for all cars"                          | 7 | 7
+
+ANOTHER SECOND
+
+* Frame #8
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 8
+[Motion]: "Contains all motion data for player's car"            | 0 | 8
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 8
+[CarStatus]: "Status data for all cars"                          | 7 | 8
+
+* Frame #9
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 9
+[Motion]: "Contains all motion data for player's car"            | 0 | 9
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 9
+[CarStatus]: "Status data for all cars"                          | 7 | 9
+
+* Frame #10
+[Event]: "Various notable events that happen during session"     | 3 | 10
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 10
+[Motion]: "Contains all motion data for player's car"            | 0 | 10
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 10
+[CarStatus]: "Status data for all cars"                          | 7 | 10
+
+* Frame #11
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 11
+[Motion]: "Contains all motion data for player's car"            | 0 | 11
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 11
+[CarStatus]: "Status data for all cars"                          | 7 | 11
+
+* Frame #12
+[Session]: "Data about the session - track, time left"           | 1 | 12
+[CarSetups]: "Packet detailing car setups for cars in the race"  | 5 | 12
+[CarDamage]: "Damage status for all cars"                        | 10 | 12
+
+* Frame #13
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 13
+[Motion]: "Contains all motion data for player's car"            | 0 | 13
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 13
+[CarStatus]: "Status data for all cars"                          | 7 | 13
+
+* Frame #14
+[Event]: "Various notable events that happen during session"     | 3 | 14
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 14
+
+* Frame #15
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 15
+[Motion]: "Contains all motion data for player's car"            | 0 | 15
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 15
+[CarStatus]: "Status data for all cars"                          | 7 | 15
+
+* Frame #16
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 16
+
+* Frame #17
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 17
+
+* Frame #18
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 18
+[Motion]: "Contains all motion data for player's car"            | 0 | 18
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 18
+[CarStatus]: "Status data for all cars"                          | 7 | 18
+
+* Frame #19
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 19
+
+* Frame #20
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 20
+
+* Frame #21
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 21
+[Motion]: "Contains all motion data for player's car"            | 0 | 21
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 21
+[CarStatus]: "Status data for all cars"                          | 7 | 21
+
+* Frame #22
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 22
+
+* Frame #23
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 23
+
+* Frame #24
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 24
+[Motion]: "Contains all motion data for player's car"            | 0 | 24
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 24
+[CarStatus]: "Status data for all cars"                          | 7 | 24
+
+* Frame #25
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 25
+
+* Frame #26
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 26
+
+* Frame #27
+[Session]: "Data about the session - track, time left"           | 1 | 27
+[CarSetups]: "Packet detailing car setups for cars in the race"  | 5 | 27
+[CarDamage]: "Damage status for all cars"                        | 10 | 27
+
+* Frame #28
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 28
+[Motion]: "Contains all motion data for player's car"            | 0 | 28
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 28
+[CarStatus]: "Status data for all cars"                          | 7 | 28
+
+* Frame #29
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 29
+
+* Frame #30
+[SessionHistory]: "Lap and tyre data for session"                | 11 | 30
+
+ANOTHER SECOND
+
+* Frame #31
+[Event]: "Various notable events that happen during session"     | 3 | 31
+[LapData]: "Data about all the lap times of cars in the session" | 2 | 31
+[Motion]: "Contains all motion data for player's car"            | 0 | 31
+[CarTelemetry]: "Telemetry data for all cars"                    | 6 | 31
+[CarStatus]: "Status data for all cars"                          | 7 | 31

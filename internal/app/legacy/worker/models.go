@@ -3,7 +3,7 @@ package worker
 import (
 	"time"
 
-	"fracetel/internal/core/telemetry"
+	"fracetel/pkg/telemetry"
 )
 
 type CarTelemetry struct {

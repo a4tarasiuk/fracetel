@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"log"
 
-	"fracetel/internal/core/telemetry"
+	"fracetel/pkg/telemetry"
 )
 
 const HeaderTotalBytes = 24
@@ -19,11 +20,11 @@ type PacketParser interface {
 var packetParsersMap = map[ID]PacketParser{
 	LapDataID:             LapTimePacketParser{},
 	CarTelemetryID:        CarTelemetryPacketParser{},
-	CarStatusID:           carStatusParser{},
-	CarDamageID:           carDamageParser{},
-	SessionID:             sessionParser{},
-	SessionHistoryID:      sessionHistoryParser{},
-	FinalClassificationID: finalClassificationParser{},
+	CarStatusID:           CarStatusParser{},
+	CarDamageID:           CarDamageParser{},
+	SessionID:             SessionParser{},
+	SessionHistoryID:      SessionHistoryParser{},
+	FinalClassificationID: FinalClassificationParser{},
 }
 
 func GetParserForPacket(packetID ID) (PacketParser, error) {
@@ -47,12 +48,12 @@ func ParserPacketHeader(packet RawPacket) (*Header, error) {
 		return &Header{}, err
 	}
 
-	// log.Printf(
-	// 	"Packet - [%s]: \"%s\" | %d\n",
-	// 	IDName[ID(header.PacketID)],
-	// 	IDDescription[ID(header.PacketID)],
-	// 	header.PacketID,
-	// )
+	log.Printf(
+		"Packet - [%s]: \"%s\" | %d\n",
+		IDName[ID(header.PacketID)],
+		IDDescription[ID(header.PacketID)],
+		header.PacketID,
+	)
 
 	return &header, nil
 }

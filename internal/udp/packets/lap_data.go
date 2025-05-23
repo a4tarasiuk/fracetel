@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"fracetel/internal/core/telemetry"
+	"fracetel/pkg/telemetry"
 )
 
 type lapData struct {

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"log"
 
-	"fracetel/internal/core/telemetry"
+	"fracetel/pkg/telemetry"
 )
 
 type EventDataCode string

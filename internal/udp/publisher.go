@@ -1,14 +1,14 @@
-package f1tel
+package udp
 
 import (
 	"context"
 	"log"
 
-	"fracetel/internal/core/telemetry"
 	"fracetel/internal/messaging"
+	"fracetel/pkg/telemetry"
 )
 
-func TelemetryMessageProcessor(
+func messagePublisher(
 	eventStream messaging.EventStream,
 	telMessageChan <-chan *telemetry.Message,
 ) {

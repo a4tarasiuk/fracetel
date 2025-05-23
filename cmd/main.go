@@ -8,10 +8,11 @@ import (
 	"os"
 	"os/signal"
 
-	"fracetel/internal/app/f1tel"
 	"fracetel/internal/app/legacy/web"
 	"fracetel/internal/app/legacy/worker"
 	"fracetel/internal/infra"
+	"fracetel/internal/messaging"
+	"fracetel/internal/udp"
 	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -61,9 +62,9 @@ func main() {
 		log.Fatalf("Failed to connect to NATS %s", err)
 	}
 
-	natsEventStream := infra.NewNatsEventStream(natsConn)
+	natsEventStream := messaging.NewNatsEventStream(natsConn)
 
-	f1TelemetryServer := f1tel.NewTelemetryServer(net.IPv4(0, 0, 0, 0), cfg.F1TelServerPort, natsEventStream)
+	f1TelemetryServer := udp.NewTelemetryServer(net.IPv4(0, 0, 0, 0), cfg.F1TelServerPort, natsEventStream)
 
 	go f1TelemetryServer.StartAndListen()
 

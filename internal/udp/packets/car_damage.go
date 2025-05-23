@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"fracetel/internal/core/telemetry"
+	"fracetel/pkg/telemetry"
 )
 
 type carDamage struct {
@@ -50,9 +50,9 @@ func (cd carDamage) ToTelemetryMessagePayload() telemetry.CarDamage {
 	}
 }
 
-type carDamageParser struct{}
+type CarDamageParser struct{}
 
-func (p carDamageParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+func (p CarDamageParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
 	*telemetry.Message,
 	error,
 ) {

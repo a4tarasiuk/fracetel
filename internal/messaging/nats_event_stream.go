@@ -1,11 +1,10 @@
-package infra
+package messaging
 
 import (
 	"context"
 	"encoding/json"
 	"log"
 
-	"fracetel/internal/messaging"
 	"github.com/nats-io/nats.go"
 )
 
@@ -17,7 +16,7 @@ func NewNatsEventStream(conn *nats.Conn) *natsEventStream {
 	return &natsEventStream{conn: conn}
 }
 
-func (p *natsEventStream) Publish(ctx context.Context, topicName string, value messaging.Event) error {
+func (p *natsEventStream) Publish(ctx context.Context, topicName string, value Event) error {
 	data, err := json.Marshal(value)
 
 	if err != nil {

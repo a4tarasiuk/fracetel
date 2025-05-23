@@ -1,12 +1,12 @@
-package f1tel
+package udp
 
 import (
 	"log"
 	"net"
 
-	"fracetel/internal/app/f1tel/packets"
-	"fracetel/internal/core/telemetry"
 	"fracetel/internal/messaging"
+	"fracetel/internal/udp/packets"
+	"fracetel/pkg/telemetry"
 )
 
 const BufferSizeBytes = 2048
@@ -46,9 +46,9 @@ func (s *telemetryServer) StartAndListen() {
 
 	log.Printf("Listening on %d", s.port)
 
-	telMessageChan := make(chan *telemetry.Message)
+	telMessageChan := make(chan *telemetry.Message, 100)
 
-	go TelemetryMessageProcessor(s.eventStream, telMessageChan)
+	go messagePublisher(s.eventStream, telMessageChan)
 
 	for {
 		buffer := make([]byte, BufferSizeBytes)

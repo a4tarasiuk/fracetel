@@ -6,7 +6,7 @@ import (
 	"errors"
 	"log"
 
-	"fracetel/internal/core/telemetry"
+	"fracetel/pkg/telemetry"
 )
 
 type sessionHistory struct {
@@ -68,9 +68,9 @@ type tyreStintHistoryData struct {
 	TyreVisualCompound uint8
 }
 
-type sessionHistoryParser struct{}
+type SessionHistoryParser struct{}
 
-func (p sessionHistoryParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+func (p SessionHistoryParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
 	*telemetry.Message,
 	error,
 ) {

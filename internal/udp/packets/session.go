@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"fracetel/internal/core/telemetry"
+	"fracetel/pkg/telemetry"
 )
 
 type session struct {
@@ -38,10 +38,10 @@ func (s session) ToTelemetryMessagePayload() telemetry.Session {
 	}
 }
 
-type sessionParser struct {
+type SessionParser struct {
 }
 
-func (p sessionParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+func (p SessionParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
 	*telemetry.Message,
 	error,
 ) {

@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"fracetel/internal/core/telemetry"
+	"fracetel/pkg/telemetry"
 )
 
 type finalClassification struct {
@@ -43,9 +43,9 @@ func (fc finalClassification) ToTelemetryMessagePayload() telemetry.FinalClassif
 	}
 }
 
-type finalClassificationParser struct{}
+type FinalClassificationParser struct{}
 
-func (p finalClassificationParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
+func (p FinalClassificationParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
 	*telemetry.Message,
 	error,
 ) {

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"fracetel/internal/core/telemetry"
+	"fracetel/pkg/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/nats-io/nats.go"
 )
