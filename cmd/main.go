@@ -3,19 +3,19 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 
 	"fracetel/internal/app/legacy/web"
-	"fracetel/internal/app/legacy/worker"
 	"fracetel/internal/infra"
+	"fracetel/internal/ingestion"
 	"fracetel/internal/messaging"
 	"fracetel/internal/udp"
+	"github.com/jackc/pgx/v5"
 	"github.com/nats-io/nats.go"
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func main() {
@@ -48,15 +48,6 @@ func main() {
 
 	cfg := infra.LoadConfigFromEnv()
 
-	mongoClient, _ := mongo.Connect(options.Client().ApplyURI(cfg.DBUrl))
-	defer func() {
-		if err := mongoClient.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
-
-	mongoDB := mongoClient.Database(cfg.DBName)
-
 	natsConn, err := nats.Connect(cfg.NatsURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to NATS %s", err)
@@ -68,7 +59,14 @@ func main() {
 
 	go f1TelemetryServer.StartAndListen()
 
-	go worker.ConsumeEvents(natsConn, mongoDB)
+	pgConn, err := pgx.Connect(context.Background(), "postgresql://postgres:postgres@localhost:5432/fracetel")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer pgConn.Close(context.Background())
+
+	ingestion.ConsumeTelemetryMessages(ctx, natsConn, pgConn)
 
 	go web.StartWsServerAndListen(natsConn)
 

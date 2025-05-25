@@ -6,7 +6,6 @@ import (
 
 	"fracetel/internal/messaging"
 	"fracetel/internal/udp/packets"
-	"fracetel/pkg/telemetry"
 )
 
 const BufferSizeBytes = 2048
@@ -46,7 +45,7 @@ func (s *telemetryServer) StartAndListen() {
 
 	log.Printf("Listening on %d", s.port)
 
-	telMessageChan := make(chan *telemetry.Message, 100)
+	telMessageChan := make(chan *messaging.Message, 100)
 
 	go messagePublisher(s.eventStream, telMessageChan)
 

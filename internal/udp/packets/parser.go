@@ -6,7 +6,7 @@ import (
 	"errors"
 	"log"
 
-	"fracetel/pkg/telemetry"
+	"fracetel/internal/messaging"
 )
 
 const HeaderTotalBytes = 24
@@ -14,7 +14,7 @@ const HeaderTotalBytes = 24
 var PacketByteOrder = binary.LittleEndian
 
 type PacketParser interface {
-	ToTelemetryMessage(header *Header, rawPacket RawPacket) (*telemetry.Message, error)
+	ToTelemetryMessage(header *Header, rawPacket RawPacket) (*messaging.Message, error)
 }
 
 var packetParsersMap = map[ID]PacketParser{

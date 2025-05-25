@@ -6,7 +6,7 @@ import (
 	"errors"
 	"log"
 
-	"fracetel/pkg/telemetry"
+	"fracetel/internal/messaging"
 )
 
 type EventDataCode string
@@ -35,7 +35,7 @@ func (e Event) IsSessionFinished() bool {
 type eventPacketParser struct{}
 
 func (p eventPacketParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
-	*telemetry.Message,
+	*messaging.Message,
 	error,
 ) {
 	event := Event{}
@@ -71,5 +71,5 @@ func (p eventPacketParser) ToTelemetryMessage(header *Header, rawPacket RawPacke
 	// 	}, nil
 	// }
 
-	return &telemetry.Message{}, errors.New("unsupported event")
+	return &messaging.Message{}, errors.New("unsupported event")
 }
