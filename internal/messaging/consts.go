@@ -1,7 +1,5 @@
 package messaging
 
-import "fracetel/pkg/telemetry"
-
 const (
 	FRaceTelStreamName = "fracetel_logs"
 	FRaceTelTopicName  = FRaceTelStreamName + ".*"
@@ -18,12 +16,29 @@ const (
 	FinalClassificationTopicName = FRaceTelStreamName + ".final_classification"
 )
 
-var MessageTypeTopicMap = map[telemetry.MessageType]string{
-	telemetry.CarTelemetryMessageType:        CarTelemetryTopicName,
-	telemetry.CarStatusMessageType:           CarStatusTopicName,
-	telemetry.CarDamageMessageType:           CarDamageTopicName,
-	telemetry.LapDataMessageType:             LapDataTopicName,
-	telemetry.SessionMessageType:             SessionTopicName,
-	telemetry.SessionHistoryMessageType:      SessionHistoryTopicName,
-	telemetry.FinalClassificationMessageType: FinalClassificationTopicName,
+type MessageType string
+
+const (
+	CarTelemetryMessageType MessageType = "CAR_TELEMETRY"
+	CarStatusMessageType    MessageType = "CAR_STATUS"
+	CarDamageMessageType    MessageType = "CAR_DAMAGE"
+
+	LapDataMessageType        MessageType = "LAP_DATA"
+	SessionMessageType        MessageType = "SESSION"
+	SessionHistoryMessageType MessageType = "SESSION_HISTORY"
+
+	FinalClassificationMessageType MessageType = "FINAL_CLASSIFICATION"
+
+	SessionStartedMessageType  MessageType = "SESSION_STARTED"
+	SessionFinishedMessageType MessageType = "SESSION_FINISHED"
+)
+
+var MessageTypeTopicMap = map[MessageType]string{
+	CarTelemetryMessageType:        CarTelemetryTopicName,
+	CarStatusMessageType:           CarStatusTopicName,
+	CarDamageMessageType:           CarDamageTopicName,
+	LapDataMessageType:             LapDataTopicName,
+	SessionMessageType:             SessionTopicName,
+	SessionHistoryMessageType:      SessionHistoryTopicName,
+	FinalClassificationMessageType: FinalClassificationTopicName,
 }

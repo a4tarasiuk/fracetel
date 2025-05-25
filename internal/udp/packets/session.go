@@ -60,7 +60,7 @@ func (p SessionParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
 	payload := sessionPacket.ToTelemetryMessagePayload()
 
 	msg := messaging.NewMessage(
-		telemetry.SessionMessageType,
+		messaging.SessionMessageType,
 		header.SessionUID,
 		header.FrameIdentifier,
 		&payload,

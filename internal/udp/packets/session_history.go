@@ -94,7 +94,7 @@ func (p SessionHistoryParser) ToTelemetryMessage(header *Header, rawPacket RawPa
 	payload := sessionHistoryPacket.ToTelemetryMessagePayload()
 
 	msg := messaging.NewMessage(
-		telemetry.SessionHistoryMessageType,
+		messaging.SessionHistoryMessageType,
 		header.SessionUID,
 		header.FrameIdentifier,
 		&payload,

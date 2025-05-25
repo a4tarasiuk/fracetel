@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 
-	"fracetel/internal/app/legacy/web"
 	"fracetel/internal/infra"
 	"fracetel/internal/ingestion"
 	"fracetel/internal/messaging"
@@ -67,8 +66,6 @@ func main() {
 	defer pgConn.Close(context.Background())
 
 	ingestion.ConsumeTelemetryMessages(ctx, natsConn, pgConn)
-
-	go web.StartWsServerAndListen(natsConn)
 
 	select {
 	case <-ctx.Done():
