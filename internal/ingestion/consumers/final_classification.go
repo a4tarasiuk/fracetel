@@ -55,7 +55,7 @@ func RegisterFinalClassification(ctx context.Context, natsConn *nats.Conn, db *p
 			)
 
 			if err != nil {
-				log.Fatalf("failed to insert lap data record to db: %s", err)
+				log.Fatalf("failed to insert final classification record to db: %s", err)
 			}
 
 		},

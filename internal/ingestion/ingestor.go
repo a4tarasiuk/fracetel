@@ -11,4 +11,5 @@ import (
 func ConsumeTelemetryMessages(ctx context.Context, natsConn *nats.Conn, db *pgx.Conn) {
 	consumers.RegisterLapData(ctx, natsConn, db)
 	consumers.RegisterFinalClassification(ctx, natsConn, db)
+	consumers.RegisterSession(ctx, natsConn, db)
 }
