@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
+	"fracetel/internal/messaging"
 	"fracetel/pkg/telemetry"
 )
 
@@ -46,7 +47,7 @@ func (fc finalClassification) ToTelemetryMessagePayload() telemetry.FinalClassif
 type FinalClassificationParser struct{}
 
 func (p FinalClassificationParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
-	*telemetry.Message,
+	*messaging.Message,
 	error,
 ) {
 
@@ -63,7 +64,7 @@ func (p FinalClassificationParser) ToTelemetryMessage(header *Header, rawPacket 
 
 	payload := finalClassificationPackets[header.PlayerCarIdx].ToTelemetryMessagePayload()
 
-	msg := telemetry.NewMessage(
+	msg := messaging.NewMessage(
 		telemetry.FinalClassificationMessageType,
 		header.SessionUID,
 		header.FrameIdentifier,

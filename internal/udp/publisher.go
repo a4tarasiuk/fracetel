@@ -5,16 +5,15 @@ import (
 	"log"
 
 	"fracetel/internal/messaging"
-	"fracetel/pkg/telemetry"
 )
 
 func messagePublisher(
 	eventStream messaging.EventStream,
-	telMessageChan <-chan *telemetry.Message,
+	telMessageChan <-chan *messaging.Message,
 ) {
 	for telMessage := range telMessageChan {
 
-		topicName, ok := telemetry.MessageTypeTopicMap[telMessage.Type]
+		topicName, ok := messaging.MessageTypeTopicMap[telMessage.Type]
 
 		if !ok {
 			continue

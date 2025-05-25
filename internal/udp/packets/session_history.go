@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 
+	"fracetel/internal/messaging"
 	"fracetel/pkg/telemetry"
 )
 
@@ -71,7 +72,7 @@ type tyreStintHistoryData struct {
 type SessionHistoryParser struct{}
 
 func (p SessionHistoryParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
-	*telemetry.Message,
+	*messaging.Message,
 	error,
 ) {
 
@@ -87,12 +88,12 @@ func (p SessionHistoryParser) ToTelemetryMessage(header *Header, rawPacket RawPa
 
 	// Session history is sent for every car. All other cars should be ignored. Only players data must be processed
 	if sessionHistoryPacket.CarIdx != header.PlayerCarIdx {
-		return &telemetry.Message{}, errors.New("skipped as it does not relate to current player")
+		return &messaging.Message{}, errors.New("skipped as it does not relate to current player")
 	}
 
 	payload := sessionHistoryPacket.ToTelemetryMessagePayload()
 
-	msg := telemetry.NewMessage(
+	msg := messaging.NewMessage(
 		telemetry.SessionHistoryMessageType,
 		header.SessionUID,
 		header.FrameIdentifier,

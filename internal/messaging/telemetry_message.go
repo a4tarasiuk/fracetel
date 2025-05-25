@@ -1,10 +1,10 @@
-package telemetry
+package messaging
 
 import (
 	"strconv"
 	"time"
 
-	"fracetel/internal/messaging"
+	"fracetel/pkg/telemetry"
 )
 
 type (
@@ -17,7 +17,7 @@ type (
 	}
 
 	Message struct {
-		Type MessageType `json:"type"`
+		Type telemetry.MessageType `json:"type"`
 
 		Header Header `json:"header"`
 
@@ -26,11 +26,11 @@ type (
 )
 
 type genericPayload interface {
-	CarTelemetry | LapData | Session | CarStatus | CarDamage | SessionHistory | FinalClassification | struct{}
+	telemetry.CarTelemetry | telemetry.LapData | telemetry.Session | telemetry.CarStatus | telemetry.CarDamage | telemetry.SessionHistory | telemetry.FinalClassification | struct{}
 }
 
 func NewMessage[T genericPayload](
-	messageType MessageType,
+	messageType telemetry.MessageType,
 	sessionID uint64,
 	frameIdentifier uint32,
 	payload *T,
@@ -51,6 +51,6 @@ func (tm Message) GetEventName() string {
 	return string(tm.Type)
 }
 
-func (tm Message) GetEventPayload() messaging.EventPayload {
+func (tm Message) GetEventPayload() EventPayload {
 	return tm
 }

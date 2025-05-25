@@ -1,6 +1,12 @@
 package telemetry
 
+import "time"
+
 type LapData struct {
+	SessionID       uint64
+	FrameIdentifier uint32
+	OccurredAt      time.Time
+
 	LastLapTimeMs    int
 	CurrentLapTimeMs int
 

@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 
+	"fracetel/internal/messaging"
 	"fracetel/pkg/telemetry"
 )
 
@@ -53,7 +54,7 @@ func (cd carDamage) ToTelemetryMessagePayload() telemetry.CarDamage {
 type CarDamageParser struct{}
 
 func (p CarDamageParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
-	*telemetry.Message,
+	*messaging.Message,
 	error,
 ) {
 	carDamagePackets := make([]carDamage, F1TotalCars)
@@ -68,7 +69,7 @@ func (p CarDamageParser) ToTelemetryMessage(header *Header, rawPacket RawPacket)
 
 	carDamagePayload := carDamagePackets[header.PlayerCarIdx].ToTelemetryMessagePayload()
 
-	msg := telemetry.NewMessage(
+	msg := messaging.NewMessage(
 		telemetry.CarDamageMessageType,
 		header.SessionUID,
 		header.FrameIdentifier,
