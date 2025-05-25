@@ -17,7 +17,7 @@ type (
 	}
 
 	Message struct {
-		Type telemetry.MessageType `json:"type"`
+		Type MessageType `json:"type"`
 
 		Header Header `json:"header"`
 
@@ -30,7 +30,7 @@ type genericPayload interface {
 }
 
 func NewMessage[T genericPayload](
-	messageType telemetry.MessageType,
+	messageType MessageType,
 	sessionID uint64,
 	frameIdentifier uint32,
 	payload *T,

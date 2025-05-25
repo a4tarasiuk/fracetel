@@ -65,7 +65,7 @@ func (p FinalClassificationParser) ToTelemetryMessage(header *Header, rawPacket 
 	payload := finalClassificationPackets[header.PlayerCarIdx].ToTelemetryMessagePayload()
 
 	msg := messaging.NewMessage(
-		telemetry.FinalClassificationMessageType,
+		messaging.FinalClassificationMessageType,
 		header.SessionUID,
 		header.FrameIdentifier,
 		&payload,

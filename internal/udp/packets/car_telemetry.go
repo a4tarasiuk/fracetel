@@ -81,7 +81,7 @@ func (p CarTelemetryPacketParser) ToTelemetryMessage(header *Header, rawPacket R
 	telemetryPayload := telemetries[header.PlayerCarIdx].ToTelemetryMessagePayload()
 
 	msg := messaging.NewMessage(
-		telemetry.CarTelemetryMessageType,
+		messaging.CarTelemetryMessageType,
 		header.SessionUID,
 		header.FrameIdentifier,
 		&telemetryPayload,

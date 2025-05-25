@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS lap_data_telemetry
 (
-    session_id          bigint PRIMARY KEY,
-    frame_identifier    bigint,
+    session_id          BIGINT PRIMARY KEY,
+    frame_identifier    BIGINT,
     occurred_at         TIMESTAMP,
     last_lap_time_ms    INTEGER,
     current_lap_time_ms INTEGER,
@@ -13,4 +13,14 @@ CREATE TABLE IF NOT EXISTS lap_data_telemetry
     current_lap_num     SMALLINT,
     sector              SMALLINT,
     driver_status       SMALLINT
+);
+
+CREATE TABLE IF NOT EXISTS final_classifications
+(
+    session_id         BIGINT PRIMARY KEY,
+    frame_identifier   BIGINT,
+    occurred_at        TIMESTAMP,
+
+    finishing_position SMALLINT,
+    starting_position  SMALLINT
 );

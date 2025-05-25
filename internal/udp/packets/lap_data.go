@@ -93,7 +93,7 @@ func (p LapTimePacketParser) ToTelemetryMessage(header *Header, rawPacket RawPac
 	lapDataPayload := lapDataPacket[header.PlayerCarIdx].ToTelemetryMessagePayload(header)
 
 	msg := messaging.NewMessage(
-		telemetry.LapDataMessageType,
+		messaging.LapDataMessageType,
 		header.SessionUID,
 		header.FrameIdentifier,
 		&lapDataPayload,
