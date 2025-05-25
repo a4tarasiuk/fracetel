@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"log"
+	"time"
 
 	"fracetel/internal/messaging"
 	"fracetel/pkg/telemetry"
@@ -25,8 +26,11 @@ type session struct {
 	Duration uint16
 }
 
-func (s session) ToTelemetryMessagePayload() telemetry.Session {
+func (s session) ToTelemetryMessagePayload(header *Header) telemetry.Session {
 	return telemetry.Session{
+		SessionID:        header.SessionUID,
+		FrameIdentifier:  header.FrameIdentifier,
+		OccurredAt:       time.Now().UTC(),
 		Weather:          int(s.Weather),
 		TrackTemperature: int(s.TrackTemperature),
 		AirTemperature:   int(s.AirTemperature),
@@ -57,7 +61,7 @@ func (p SessionParser) ToTelemetryMessage(header *Header, rawPacket RawPacket) (
 		log.Printf("Error during reading Session: %s", err)
 	}
 
-	payload := sessionPacket.ToTelemetryMessagePayload()
+	payload := sessionPacket.ToTelemetryMessagePayload(header)
 
 	msg := messaging.NewMessage(
 		messaging.SessionMessageType,

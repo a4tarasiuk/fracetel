@@ -24,3 +24,19 @@ CREATE TABLE IF NOT EXISTS final_classifications
     finishing_position SMALLINT,
     starting_position  SMALLINT
 );
+
+CREATE TABLE IF NOT EXISTS session_telemetry
+(
+    session_id        BIGINT PRIMARY KEY,
+    frame_identifier  BIGINT,
+    occurred_at       TIMESTAMP,
+    weather           SMALLINT,
+    track_temperature SMALLINT,
+    air_temperature   SMALLINT,
+    total_laps        SMALLINT,
+    track_length      SMALLINT,
+    track_id          SMALLINT,
+    type              INTEGER,
+    time_left         INTEGER,
+    duration          INTEGER
+);

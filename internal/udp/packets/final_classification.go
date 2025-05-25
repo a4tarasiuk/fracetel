@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"log"
+	"time"
 
 	"fracetel/internal/messaging"
 	"fracetel/pkg/telemetry"
@@ -36,8 +37,11 @@ type finalClassification struct {
 	TyreStintsEndLaps [8]uint8
 }
 
-func (fc finalClassification) ToTelemetryMessagePayload() telemetry.FinalClassification {
+func (fc finalClassification) ToTelemetryMessagePayload(header *Header) telemetry.FinalClassification {
 	return telemetry.FinalClassification{
+		SessionID:         header.SessionUID,
+		FrameIdentifier:   header.FrameIdentifier,
+		OccurredAt:        time.Now().UTC(),
 		FinishingPosition: int(fc.FinishingPosition),
 		StartingPosition:  int(fc.StartingPosition),
 		BestLapTimeMs:     float32(fc.BestLapTimeMs),
@@ -62,7 +66,7 @@ func (p FinalClassificationParser) ToTelemetryMessage(header *Header, rawPacket 
 		log.Printf("Error during reading Session: %s", err)
 	}
 
-	payload := finalClassificationPackets[header.PlayerCarIdx].ToTelemetryMessagePayload()
+	payload := finalClassificationPackets[header.PlayerCarIdx].ToTelemetryMessagePayload(header)
 
 	msg := messaging.NewMessage(
 		messaging.FinalClassificationMessageType,

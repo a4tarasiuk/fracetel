@@ -1,6 +1,12 @@
 package telemetry
 
+import "time"
+
 type Session struct {
+	SessionID       uint64
+	FrameIdentifier uint32
+	OccurredAt      time.Time
+
 	Weather int
 
 	TrackTemperature int
