@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"fracetel/internal/infra"
 	"fracetel/internal/ingestion"
@@ -18,22 +18,10 @@ import (
 )
 
 func main() {
-	// TODO:
-	//  1. Create module interface that accepts all the infra staff (natsConn, mongo.Database)
-	//  2. Add implementation that creates needed interface implementations with provided infra objects
-	//  3. Allow to start-up the sub-applications via module interface
-	//  The main goal is to encapsulate infra staff and module logic with components
+	ctx, stop := context.WithCancel(context.Background())
 
-	// TODO: Add graceful shutdown
-
-	// 	ctx, cancel := context.WithCancel(context.Background())
-	//	ch := make(chan os.Signal, 1)
-	//	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
-	// 	<-ch
-	//	cancel()
-
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
+	signalStream := make(chan os.Signal, 1)
+	signal.Notify(signalStream, syscall.SIGINT, syscall.SIGTERM)
 
 	// Set up OpenTelemetry.
 	oTelShutdown, err := infra.SetupOTelSDK(ctx)
@@ -51,26 +39,23 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to NATS %s", err)
 	}
+	defer natsConn.Close()
 
 	natsEventStream := messaging.NewNatsEventStream(natsConn)
 
-	f1TelemetryServer := udp.NewTelemetryServer(net.IPv4(0, 0, 0, 0), cfg.F1TelServerPort, natsEventStream)
+	udpTelemetryServer := udp.NewTelemetryServer(net.IPv4(0, 0, 0, 0), cfg.F1TelServerPort, natsEventStream)
 
-	go f1TelemetryServer.StartAndListen()
+	go udpTelemetryServer.StartAndListen(ctx)
 
 	pgPool, err := pgxpool.New(context.Background(), "postgresql://postgres:postgres@localhost:5432/fracetel")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
 	defer pgPool.Close()
 
 	ingestion.ConsumeTelemetryMessages(ctx, natsConn, pgPool)
 
-	select {
-	case <-ctx.Done():
-		stop()
-	}
+	<-signalStream
 
-	// TODO: Shutdown app
+	stop() // TODO: Replace with defer when infra and app abstraction are added
 }
