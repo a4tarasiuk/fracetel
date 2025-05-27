@@ -40,3 +40,19 @@ CREATE TABLE IF NOT EXISTS session_telemetry
     time_left         INTEGER,
     duration          INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS session_history_telemetry
+(
+    session_id            BIGINT PRIMARY KEY,
+    frame_identifier      BIGINT,
+    occurred_at           TIMESTAMP,
+    num_laps              INTEGER,
+
+    best_lap_time_lap_num INTEGER,
+
+    best_sector_1_lap_num INTEGER,
+    best_sector_2_lap_num INTEGER,
+    best_sector_3_lap_num INTEGER,
+
+    laps_history           JSON
+);

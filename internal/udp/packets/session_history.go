@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"log"
+	"time"
 
 	"fracetel/internal/messaging"
 	"fracetel/pkg/telemetry"
@@ -28,7 +29,7 @@ type sessionHistory struct {
 	TyreStintHistoryData [8]tyreStintHistoryData
 }
 
-func (sh sessionHistory) ToTelemetryMessagePayload() telemetry.SessionHistory {
+func (sh sessionHistory) ToTelemetryMessagePayload(header *Header) telemetry.SessionHistory {
 	lapsHistory := make([]telemetry.LapHistory, len(sh.LapHistoryData))
 
 	for idx := 0; idx < len(sh.LapHistoryData); idx++ {
@@ -43,6 +44,9 @@ func (sh sessionHistory) ToTelemetryMessagePayload() telemetry.SessionHistory {
 	}
 
 	return telemetry.SessionHistory{
+		SessionID:         header.SessionUID,
+		FrameIdentifier:   header.FrameIdentifier,
+		OccurredAt:        time.Now().UTC(),
 		NumLaps:           int(sh.NumLaps),
 		BestLapTimeLapNum: int(sh.BestLapTimeLapNum),
 		BestSector1LapNum: int(sh.BestSector1LapNum),
@@ -91,7 +95,7 @@ func (p SessionHistoryParser) ToTelemetryMessage(header *Header, rawPacket RawPa
 		return &messaging.Message{}, errors.New("skipped as it does not relate to current player")
 	}
 
-	payload := sessionHistoryPacket.ToTelemetryMessagePayload()
+	payload := sessionHistoryPacket.ToTelemetryMessagePayload(header)
 
 	msg := messaging.NewMessage(
 		messaging.SessionHistoryMessageType,
