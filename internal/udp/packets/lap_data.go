@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"log"
+	"strconv"
 	"time"
 
 	"fracetel/internal/messaging"
@@ -57,7 +58,7 @@ type lapData struct {
 
 func (ld lapData) ToTelemetryMessagePayload(header *Header) telemetry.LapData {
 	return telemetry.LapData{
-		SessionID:          header.SessionUID,
+		SessionID:          strconv.FormatUint(header.SessionUID, 10),
 		FrameIdentifier:    header.FrameIdentifier,
 		OccurredAt:         time.Now().UTC(),
 		LastLapTimeMs:      int(ld.LastLapTimeMs),

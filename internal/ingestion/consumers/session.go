@@ -7,11 +7,11 @@ import (
 
 	"fracetel/internal/messaging"
 	"fracetel/pkg/telemetry"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go"
 )
 
-func RegisterSession(ctx context.Context, natsConn *nats.Conn, db *pgx.Conn) {
+func RegisterSession(ctx context.Context, natsConn *nats.Conn, db *pgxpool.Pool) {
 	_, err := natsConn.Subscribe(
 		messaging.SessionTopicName, func(natsMsg *nats.Msg) {
 			natsMsg.Ack()
@@ -30,6 +30,13 @@ func RegisterSession(ctx context.Context, natsConn *nats.Conn, db *pgx.Conn) {
 
 			log.Printf("received msg with [%s] subject: %+v", messaging.SessionTopicName, session)
 
+			conn, err := db.Acquire(ctx)
+			defer conn.Release()
+
+			if err != nil {
+				log.Fatalf("cannot aquire db conn from pool")
+			}
+
 			query := `
 			INSERT INTO session_telemetry (
 			                      session_id, 
@@ -47,7 +54,7 @@ func RegisterSession(ctx context.Context, natsConn *nats.Conn, db *pgx.Conn) {
 		  	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 			`
 
-			_, err := db.Exec(
+			_, err = conn.Exec(
 				context.Background(),
 				query,
 				session.SessionID,

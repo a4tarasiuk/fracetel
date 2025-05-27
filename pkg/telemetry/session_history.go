@@ -1,6 +1,12 @@
 package telemetry
 
+import "time"
+
 type SessionHistory struct {
+	SessionID       string
+	FrameIdentifier uint32
+	OccurredAt      time.Time
+
 	NumLaps int
 
 	BestLapTimeLapNum int
@@ -13,9 +19,9 @@ type SessionHistory struct {
 }
 
 type LapHistory struct {
-	LapTimeMs int
+	LapTimeMs int `json:"lap_time_ms"`
 
-	Sector1Ms int
-	Sector2Ms int
-	Sector3Ms int
+	Sector1Ms int `json:"sector_1_ms"`
+	Sector2Ms int `json:"sector_2_ms"`
+	Sector3Ms int `json:"sector_3_ms"`
 }
