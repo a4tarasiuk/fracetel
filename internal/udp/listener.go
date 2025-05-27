@@ -1,6 +1,7 @@
 package udp
 
 import (
+	"context"
 	"log"
 	"net"
 
@@ -29,7 +30,7 @@ func NewTelemetryServer(
 	}
 }
 
-func (s *telemetryServer) StartAndListen() {
+func (s *telemetryServer) StartAndListen(ctx context.Context) {
 	addr := net.UDPAddr{
 		IP:   s.addr,
 		Port: s.port,
@@ -41,43 +42,51 @@ func (s *telemetryServer) StartAndListen() {
 		log.Fatalf("Failed to listen UDP: %v", err)
 	}
 
-	defer conn.Close()
+	telemetryMessageChan := make(chan *messaging.Message, 100)
 
-	log.Printf("Listening on %d", s.port)
+	defer func() {
+		conn.Close()
+		close(telemetryMessageChan)
+	}()
 
-	telMessageChan := make(chan *messaging.Message, 100)
+	log.Printf("UDP server is listening on %d", s.port)
 
-	go messagePublisher(s.eventStream, telMessageChan)
+	go messagePublisher(s.eventStream, telemetryMessageChan)
 
-	for {
-		buffer := make([]byte, BufferSizeBytes)
+	go func() {
+		for {
+			buffer := make([]byte, BufferSizeBytes)
 
-		nRead, _, err := conn.ReadFrom(buffer)
+			nRead, _, err := conn.ReadFrom(buffer)
 
-		if err != nil {
-			log.Printf("Error during reading packets: %v\n", err)
+			if err != nil {
+				log.Printf("Error during reading packets: %v\n", err)
+				return
+			}
+
+			rawPacket := buffer[:nRead]
+
+			header, err := packets.ParserPacketHeader(rawPacket)
+			if err != nil {
+				log.Printf("Error during reading Message: %s", err)
+				continue
+			}
+
+			parser, err := packets.GetParserForPacket(packets.ID(header.PacketID))
+			if err != nil {
+				continue
+			}
+
+			telemetryMessage, err := parser.ToTelemetryMessage(header, rawPacket)
+			if err != nil {
+				continue
+			}
+
+			telemetryMessageChan <- telemetryMessage
 		}
+	}()
 
-		rawPacket := buffer[:nRead]
+	<-ctx.Done()
 
-		header, err := packets.ParserPacketHeader(rawPacket)
-		if err != nil {
-			log.Printf("Error during reading Message: %s", err)
-			continue
-		}
-
-		packetID := packets.ID(header.PacketID)
-
-		parser, err := packets.GetParserForPacket(packetID)
-		if err != nil {
-			continue
-		}
-
-		telMessage, err := parser.ToTelemetryMessage(header, rawPacket)
-		if err != nil {
-			continue
-		}
-
-		telMessageChan <- telMessage
-	}
+	log.Println("UDP server is shutting down")
 }
