@@ -13,7 +13,7 @@ import (
 	"fracetel/internal/ingestion"
 	"fracetel/internal/messaging"
 	"fracetel/internal/udp"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go"
 )
 
@@ -58,14 +58,14 @@ func main() {
 
 	go f1TelemetryServer.StartAndListen()
 
-	pgConn, err := pgx.Connect(context.Background(), "postgresql://postgres:postgres@localhost:5432/fracetel")
+	pgPool, err := pgxpool.New(context.Background(), "postgresql://postgres:postgres@localhost:5432/fracetel")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		os.Exit(1)
 	}
-	defer pgConn.Close(context.Background())
+	defer pgPool.Close()
 
-	ingestion.ConsumeTelemetryMessages(ctx, natsConn, pgConn)
+	ingestion.ConsumeTelemetryMessages(ctx, natsConn, pgPool)
 
 	select {
 	case <-ctx.Done():

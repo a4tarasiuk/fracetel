@@ -7,11 +7,11 @@ import (
 
 	"fracetel/internal/messaging"
 	"fracetel/pkg/telemetry"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go"
 )
 
-func RegisterFinalClassification(ctx context.Context, natsConn *nats.Conn, db *pgx.Conn) {
+func RegisterFinalClassification(ctx context.Context, natsConn *nats.Conn, db *pgxpool.Pool) {
 	_, err := natsConn.Subscribe(
 		messaging.FinalClassificationTopicName, func(natsMsg *nats.Msg) {
 			natsMsg.Ack()
@@ -34,6 +34,13 @@ func RegisterFinalClassification(ctx context.Context, natsConn *nats.Conn, db *p
 				finalClassification,
 			)
 
+			conn, err := db.Acquire(ctx)
+			defer conn.Release()
+
+			if err != nil {
+				log.Fatalf("cannot aquire db conn from pool")
+			}
+
 			query := `
 			INSERT INTO final_classifications (
 			                      session_id, 
@@ -44,7 +51,7 @@ func RegisterFinalClassification(ctx context.Context, natsConn *nats.Conn, db *p
 		  	) VALUES ($1, $2, $3, $4, $5)
 			`
 
-			_, err := db.Exec(
+			_, err = conn.Exec(
 				context.Background(),
 				query,
 				finalClassification.SessionID,
