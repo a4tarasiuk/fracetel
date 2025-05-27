@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS lap_data_telemetry
 (
-    session_id          BIGINT PRIMARY KEY,
+    session_id          VARCHAR(25),
     frame_identifier    BIGINT,
     occurred_at         TIMESTAMP,
     last_lap_time_ms    INTEGER,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS lap_data_telemetry
 
 CREATE TABLE IF NOT EXISTS final_classifications
 (
-    session_id         BIGINT PRIMARY KEY,
+    session_id         VARCHAR(25),
     frame_identifier   BIGINT,
     occurred_at        TIMESTAMP,
 
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS final_classifications
 
 CREATE TABLE IF NOT EXISTS session_telemetry
 (
-    session_id        BIGINT PRIMARY KEY,
+    session_id        VARCHAR(25),
     frame_identifier  BIGINT,
     occurred_at       TIMESTAMP,
     weather           SMALLINT,
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS session_telemetry
 
 CREATE TABLE IF NOT EXISTS session_history_telemetry
 (
-    session_id            BIGINT PRIMARY KEY,
+    session_id            VARCHAR(25),
     frame_identifier      BIGINT,
     occurred_at           TIMESTAMP,
     num_laps              INTEGER,

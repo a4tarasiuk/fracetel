@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"log"
+	"strconv"
 	"time"
 
 	"fracetel/internal/messaging"
@@ -28,7 +29,7 @@ type session struct {
 
 func (s session) ToTelemetryMessagePayload(header *Header) telemetry.Session {
 	return telemetry.Session{
-		SessionID:        header.SessionUID,
+		SessionID:        strconv.FormatUint(header.SessionUID, 10),
 		FrameIdentifier:  header.FrameIdentifier,
 		OccurredAt:       time.Now().UTC(),
 		Weather:          int(s.Weather),

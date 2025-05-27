@@ -3,7 +3,7 @@ package telemetry
 import "time"
 
 type Session struct {
-	SessionID       uint64
+	SessionID       string
 	FrameIdentifier uint32
 	OccurredAt      time.Time
 

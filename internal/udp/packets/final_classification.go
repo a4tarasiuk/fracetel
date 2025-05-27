@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"log"
+	"strconv"
 	"time"
 
 	"fracetel/internal/messaging"
@@ -39,7 +40,7 @@ type finalClassification struct {
 
 func (fc finalClassification) ToTelemetryMessagePayload(header *Header) telemetry.FinalClassification {
 	return telemetry.FinalClassification{
-		SessionID:         header.SessionUID,
+		SessionID:         strconv.FormatUint(header.SessionUID, 10),
 		FrameIdentifier:   header.FrameIdentifier,
 		OccurredAt:        time.Now().UTC(),
 		FinishingPosition: int(fc.FinishingPosition),

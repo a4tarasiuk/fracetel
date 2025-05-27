@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"log"
+	"strconv"
 	"time"
 
 	"fracetel/internal/messaging"
@@ -44,7 +45,7 @@ func (sh sessionHistory) ToTelemetryMessagePayload(header *Header) telemetry.Ses
 	}
 
 	return telemetry.SessionHistory{
-		SessionID:         header.SessionUID,
+		SessionID:         strconv.FormatUint(header.SessionUID, 10),
 		FrameIdentifier:   header.FrameIdentifier,
 		OccurredAt:        time.Now().UTC(),
 		NumLaps:           int(sh.NumLaps),
