@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,8 +12,6 @@ import (
 	"fracetel/internal/ingestion"
 	"fracetel/internal/messaging"
 	"fracetel/internal/udp"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/nats-io/nats.go"
 )
 
 func main() {
@@ -23,39 +20,34 @@ func main() {
 	signalStream := make(chan os.Signal, 1)
 	signal.Notify(signalStream, syscall.SIGINT, syscall.SIGTERM)
 
-	// Set up OpenTelemetry.
 	oTelShutdown, err := infra.SetupOTelSDK(ctx)
 	if err != nil {
 		return
 	}
-	// Handle shutdown properly so nothing leaks.
 	defer func() {
 		err = errors.Join(err, oTelShutdown(context.Background()))
 	}()
 
-	cfg := infra.LoadConfigFromEnv()
+	infra, err := infra.Init(ctx)
 
-	natsConn, err := nats.Connect(cfg.NatsURL)
 	if err != nil {
-		log.Fatalf("Failed to connect to NATS %s", err)
+		infra.Shutdown()
+		log.Fatalf("Failed to start application: %s", err)
 	}
-	defer natsConn.Close()
 
-	natsEventStream := messaging.NewNatsEventStream(natsConn)
+	natsEventStream := messaging.NewNatsEventStream(infra.NatsConn)
 
-	udpTelemetryServer := udp.NewTelemetryServer(net.IPv4(0, 0, 0, 0), cfg.F1TelServerPort, natsEventStream)
+	udpTelemetryServer := udp.NewTelemetryServer(infra.Config.UDPServerPort, natsEventStream)
 
 	go udpTelemetryServer.StartAndListen(ctx)
 
-	pgPool, err := pgxpool.New(context.Background(), "postgresql://postgres:postgres@localhost:5432/fracetel")
-	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
-	}
-	defer pgPool.Close()
-
-	ingestion.ConsumeTelemetryMessages(ctx, natsConn, pgPool)
+	ingestion.ConsumeTelemetryMessages(ctx, infra)
 
 	<-signalStream
 
 	stop() // TODO: Replace with defer when infra and app abstraction are added
+
+	if err = infra.Shutdown(); err != nil {
+		log.Fatalf("Failed to shutdown application: %s", err)
+	}
 }

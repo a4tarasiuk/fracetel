@@ -7,12 +7,11 @@ import (
 )
 
 type Config struct {
-	DBUrl  string `mapstructure:"DB_URL"`
-	DBName string `mapstructure:"DB_NAME"`
+	DBUrl string `mapstructure:"DB_URL"`
 
 	NatsURL string `mapstructure:"NATS_URL"`
 
-	F1TelServerPort int `mapstructure:"F1_TELEMETRY_SERVER_PORT"`
+	UDPServerPort int `mapstructure:"UDP_SERVER_PORT"`
 }
 
 func LoadConfigFromEnv() Config {

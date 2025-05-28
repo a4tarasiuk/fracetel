@@ -19,12 +19,11 @@ type telemetryServer struct {
 }
 
 func NewTelemetryServer(
-	addr net.IP,
 	port int,
 	eventStream messaging.EventStream,
 ) *telemetryServer {
 	return &telemetryServer{
-		addr:        addr,
+		addr:        net.IPv4(0, 0, 0, 0),
 		port:        port,
 		eventStream: eventStream,
 	}
@@ -49,7 +48,7 @@ func (s *telemetryServer) StartAndListen(ctx context.Context) {
 		close(telemetryMessageChan)
 	}()
 
-	log.Printf("UDP server is listening on %d", s.port)
+	log.Printf("UDP server is listening on :%d", s.port)
 
 	go messagePublisher(s.eventStream, telemetryMessageChan)
 
