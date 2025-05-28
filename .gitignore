@@ -195,3 +195,5 @@ docker-compose.yml
 todo
 
 .env
+
+.local/

@@ -35,7 +35,7 @@ TODO:
 Used technologies:
 * Golang
 * NATS
-* MongoDB
+* Postgres
 * OpenTelemetry
 * Prometheus
 * Grafana
