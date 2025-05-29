@@ -3,13 +3,13 @@ package session
 import (
 	"context"
 
-	"fracetel/internal/infra"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Service interface {
 	Create(ctx context.Context, sessionID string) (Session, error)
 }
 
-func NewService(infra infra.Infra) Service {
-	return postgresSessionService{infra.DB}
+func NewService(db *pgxpool.Pool) Service {
+	return postgresSessionService{db: db}
 }

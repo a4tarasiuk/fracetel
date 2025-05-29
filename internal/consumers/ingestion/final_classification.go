@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"fracetel/internal/messaging"
+	"fracetel/internal/session"
 	"fracetel/pkg/telemetry"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go"
@@ -64,6 +65,13 @@ func RegisterFinalClassification(ctx context.Context, natsConn *nats.Conn, db *p
 			if err != nil {
 				log.Fatalf("failed to insert final classification record to db: %s", err)
 			}
+
+			go func() {
+				_, err = session.NewService(db).Create(ctx, finalClassification.SessionID)
+				if err != nil {
+					log.Printf("Failed to create session: %s", err)
+				}
+			}()
 
 		},
 	)
