@@ -19,9 +19,9 @@ type session struct {
 
 	TotalLaps   uint8
 	TrackLength uint16
-	TrackID     int8
+	Type        uint8
 
-	Type uint8
+	TrackID int8
 
 	TimeLeft uint16
 	Duration uint16
