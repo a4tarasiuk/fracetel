@@ -54,5 +54,27 @@ CREATE TABLE IF NOT EXISTS session_history_telemetry
     best_sector_2_lap_num INTEGER,
     best_sector_3_lap_num INTEGER,
 
-    laps_history           JSON
+    laps_history          JSON
+);
+
+CREATE TABLE IF NOT EXISTS sessions
+(
+    id                      VARCHAR(25) PRIMARY KEY,
+
+    fastest_lap_time_ms     INT,
+    fastest_lap_sector_1_ms INT,
+    fastest_lap_sector_2_ms INT,
+    fastest_lap_sector_3_ms INT,
+    fastest_lap_number      SMALLINT,
+
+    total_laps              SMALLINT,
+    track_id                SMALLINT,
+
+    weather                 SMALLINT,
+    duration                INT,
+
+    starting_position       SMALLINT,
+    finishing_position      SMALLINT,
+
+    created_at              TIMESTAMP
 );
