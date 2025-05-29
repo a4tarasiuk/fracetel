@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"fracetel/internal/consumers"
 	"fracetel/internal/infra"
-	"fracetel/internal/ingestion"
 	"fracetel/internal/messaging"
 	"fracetel/internal/udp"
 )
@@ -41,7 +41,7 @@ func main() {
 
 	go udpTelemetryServer.StartAndListen(ctx)
 
-	ingestion.ConsumeTelemetryMessages(ctx, infra)
+	consumers.Register(ctx, infra)
 
 	<-signalStream
 

@@ -1,4 +1,4 @@
-package consumers
+package ingestion
 
 import (
 	"context"
